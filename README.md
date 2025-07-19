@@ -6,5 +6,7 @@
 
 ## Business Requirements
 
+- minimal 
+
 ## Quick Start
 
