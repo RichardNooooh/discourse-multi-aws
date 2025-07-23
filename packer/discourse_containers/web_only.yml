@@ -1,0 +1,43 @@
+templates:
+  - "templates/web.template.yml"
+  - "templates/web.ratelimited.template.yml"
+  - "templates/cloudflare.template.yml"
+  - "env.yml" # ensures environmental variables are set correctly at bootstrap w/o showing them here
+
+expose:
+  - "80:80" # http
+  - "443:443" # https
+
+# no need for `links` since we are using RDS here
+env:
+  LC_ALL: en_US.UTF-8
+  LANG: en_US.UTF-8
+  LANGUAGE: en_US.UTF-8
+
+volumes:
+  - volume:
+      host: /var/discourse/shared/web-only
+      guest: /shared
+  - volume:
+      host: /var/discourse/shared/web-only/log/var-log
+      guest: /var/log
+
+hooks:
+  after_code:
+    - exec:
+        cd: $home/plugins
+        cmd:
+          - sudo -E -u discourse git clone https://github.com/discourse/docker_manager.git
+          - sudo -E -u discourse git clone https://github.com/discourse/discourse-adplugin.git
+          - sudo -E -u discourse git clone https://github.com/discourse/discourse-topic-voting.git
+          - sudo -E -u discourse git clone https://github.com/discourse/discourse-policy.git
+          - sudo -E -u discourse git clone https://github.com/discourse/discourse-category-experts.git
+          - sudo -E -u discourse git clone https://github.com/discourse/discourse-perspective-api.git
+          - sudo -E -u discourse git clone https://github.com/discourse/discourse-yearly-review.git
+          - sudo -E -u discourse git clone https://github.com/discourse/discourse-cakeday.git
+          - sudo -E -u discourse git clone https://github.com/discourse/discourse-saved-searches.git
+          - sudo -E -u discourse git clone https://github.com/discourse/discourse-surveys.git
+          
+
+run:
+  - exec: awk -F\# '{print $1;}' ~/.ssh/authorized_keys | awk 'BEGIN { print "Authorized SSH keys for this container:"; } NF>=2 {print $NF;}'
