@@ -17,9 +17,9 @@ locals {
 
 source "amazon-ebs" "ubuntu" {
   ami_name      = "${var.ami_prefix}-${local.timestamp}"
-  instance_type = "t2.small" # TODO check
+  instance_type = "t3.medium"
   region        = "us-west-2"
-  source_ami_filter { # TODO add more storage (maybe 15 GB?)
+  source_ami_filter {
     filters = {
       name                = "ubuntu/images/*ubuntu-noble-24.04-amd64-server-*"
       root-device-type    = "ebs"
@@ -29,7 +29,21 @@ source "amazon-ebs" "ubuntu" {
     owners      = ["099720109477"]
   }
   ssh_username = "ubuntu"
+
+  launch_block_device_mappings {
+    device_name           = "/dev/sda1"
+    volume_size           = 16
+    volume_type           = "gp3"
+    delete_on_termination = true
+  }
+
+  ami_block_device_mappings {
+    device_name = "/dev/sda1"
+    volume_size = 16
+    volume_type = "gp3"
+  }
 }
+
 
 build {
   name = "discourse_web"
@@ -38,16 +52,16 @@ build {
   ]
 
   provisioner "shell" {
-    script = "update.sh"
+    script            = "update.sh"
     expect_disconnect = true
   }
 
   provisioner "file" {
-    source      = "discourse_containers/web_only.yml"
-    destination = "/tmp/web_only.yml"
+    source       = "discourse_containers/web_only.yml"
+    destination  = "/tmp/web_only.yml"
     pause_before = "30s"
   }
-  provisioner "file" {
+  provisioner "file" { # TODO remove
     source      = "discourse_containers/env.yml"
     destination = "/tmp/env.yml"
   }
