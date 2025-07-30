@@ -1,34 +1,28 @@
 env:
-  ## TODO: The domain name this Discourse instance will respond to
   DISCOURSE_HOSTNAME: 'discourse.example.com'
-
-  ## TODO: List of comma delimited emails that will be made admin and developer
-  ## on initial signup example 'user1@example.com,user2@example.com'
+  # list of comma delimited emails that will be made admin and developer
   DISCOURSE_DEVELOPER_EMAILS: 'me@example.com,you@example.com'
 
-  ## TODO: The SMTP mail server used to validate new accounts and send notifications
-  # SMTP ADDRESS, username, and password are required
-  # WARNING the char '#' in SMTP password can cause problems!
   DISCOURSE_SMTP_ADDRESS: smtp.example.com
-  #DISCOURSE_SMTP_PORT: 587
+  DISCOURSE_SMTP_PORT: 587
   DISCOURSE_SMTP_USER_NAME: user@example.com
   DISCOURSE_SMTP_PASSWORD: pa$$word
   #DISCOURSE_SMTP_ENABLE_START_TLS: true           # (optional, default true)
   #DISCOURSE_SMTP_DOMAIN: discourse.example.com    # (required by some providers)
   #DISCOURSE_NOTIFICATION_EMAIL: noreply@discourse.example.com    # (address to send notifications from)
 
-  ## If you added the Lets Encrypt template, uncomment below to get a free SSL certificate
-  #LETSENCRYPT_ACCOUNT_EMAIL: me@example.com
-
-  ## TODO: configure connectivity to the databases
   DISCOURSE_DB_SOCKET: ''
   #DISCOURSE_DB_USERNAME: discourse
   DISCOURSE_DB_PASSWORD:
   DISCOURSE_DB_HOST:
-
-  DISCOURSE_REDIS_HOST: # primary endpoint!!
+  DISCOURSE_REDIS_HOST:
   DISCOURSE_REDIS_PORT: 6379
-  DISCOURSE_REDIS_USE_SSL: true
+
+  DISCOURSE_S3_ACCESS_KEY_ID: myaccesskey
+  DISCOURSE_S3_SECRET_ACCESS_KEY: mysecretkey
+  # DISCOURSE_S3_CDN_URL: 
+  DISCOURSE_S3_BUCKET: # make sure you only include name, not full ARN name
+  DISCOURSE_S3_BACKUP_BUCKET:
 
   DISCOURSE_MAXMIND_ACCOUNT_ID:
   DISCOURSE_MAXMIND_LICENSE_KEY:

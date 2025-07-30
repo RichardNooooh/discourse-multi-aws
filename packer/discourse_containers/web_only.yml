@@ -1,6 +1,8 @@
 templates:
   - "templates/web.template.yml"
   - "templates/web.ratelimited.template.yml"
+  # "templates/web.ssl.template.yml" is not needed/desired b/c we are terminating TLS on ALB
+
   - "templates/cloudflare.template.yml"
   # should be written at runtime in Github Actions
   # ensures environmental variables are set correctly at bootstrap w/o showing them here
@@ -16,7 +18,21 @@ env:
   LANG: en_US.UTF-8
   LANGUAGE: en_US.UTF-8
 
-  UNICORN_WORKERS: 3 # raise when we increase CPU size of instance
+  # https://meta.discourse.org/t/trouble-bootstrapping-with-rds-could-not-open-certificate-file/289367
+  PGSSLCERT: /tmp/postgresql.crt
+  DISCOURSE_REDIS_USE_SSL: true
+
+  DISCOURSE_CAN_PERMANENTLY_DELETE: true
+
+  UNICORN_WORKERS: 2 # raise when we increase CPU size of instance
+
+  DISCOURSE_USE_S3: true
+  DISCOURSE_S3_REGION: us-west-2
+  DISCOURSE_BACKUP_LOCATION: s3
+  DISCOURSE_INCLUDE_S3_UPLOADS_IN_BACKUPS: true
+
+params:
+  version: stable
 
 volumes:
   - volume:
@@ -38,3 +54,9 @@ hooks:
           - sudo -E -u discourse git clone https://github.com/discourse/discourse-cakeday.git
           - sudo -E -u discourse git clone https://github.com/discourse/discourse-saved-searches.git
           - sudo -E -u discourse git clone https://github.com/discourse/discourse-surveys.git
+  after_assets_precompile:
+    - exec:
+        cd: $home
+        cmd:
+          - sudo -E -u discourse bundle exec rake s3:upload_assets
+          - sudo -E -u discourse bundle exec rake s3:expire_missing_assets
