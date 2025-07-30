@@ -11,14 +11,26 @@ variable "ami_prefix" {
   type = string
 }
 
+variable "build_instance" {
+  type = string
+}
+
+variable "build_volume" {
+  type = number
+}
+
+variable "aws_region" {
+  type = string
+}
+
 locals {
   timestamp = regex_replace(timestamp(), "[- TZ:]", "")
 }
 
 source "amazon-ebs" "ubuntu" {
   ami_name      = "${var.ami_prefix}-${local.timestamp}"
-  instance_type = "t3.medium"
-  region        = "us-west-2"
+  instance_type = "${var.build_instance}"
+  region        = "${var.aws_region}"
   source_ami_filter {
     filters = {
       name                = "ubuntu/images/*ubuntu-noble-24.04-amd64-server-*"
@@ -32,14 +44,14 @@ source "amazon-ebs" "ubuntu" {
 
   launch_block_device_mappings {
     device_name           = "/dev/sda1"
-    volume_size           = 16
+    volume_size           = var.build_volume
     volume_type           = "gp3"
     delete_on_termination = true
   }
 
   ami_block_device_mappings {
     device_name = "/dev/sda1"
-    volume_size = 16
+    volume_size = var.build_volume
     volume_type = "gp3"
   }
 }
