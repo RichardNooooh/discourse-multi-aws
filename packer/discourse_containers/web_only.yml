@@ -20,7 +20,7 @@ env:
 
   # https://meta.discourse.org/t/trouble-bootstrapping-with-rds-could-not-open-certificate-file/289367
   PGSSLCERT: /tmp/postgresql.crt
-  DISCOURSE_REDIS_USE_SSL: true
+  # DISCOURSE_REDIS_USE_SSL: true  # this will be required if cache is on Elasticache
 
   DISCOURSE_CAN_PERMANENTLY_DELETE: true
 

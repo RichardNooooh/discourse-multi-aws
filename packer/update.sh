@@ -1,11 +1,11 @@
 #!/bin/bash
 
-set -euox pipefail
+set -euo pipefail
 
 echo "Starting package update..."
 sudo apt-get update
 sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
-sudo DEBIAN_FRONTEND=noninteractive apt-get -y install ca-certificates curl
+sudo DEBIAN_FRONTEND=noninteractive apt-get -y install ca-certificates curl htop
 
 # official Docker installation instructions
 sudo install -m 0755 -d /etc/apt/keyrings
