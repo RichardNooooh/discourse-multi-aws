@@ -1,2 +1,6 @@
-env.yml
+env.*
 *.log
+
+.terraform.lock.hcl
+.terraform/
+.terragrunt-cache/
