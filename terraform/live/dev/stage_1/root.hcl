@@ -1,5 +1,6 @@
 
 locals {
+  region = "us-west-2"
   state_bucket = get_env("TG_state_bucket")
   # cloudflare_api_token = get_env("TG_cloudflare_api_token")
 }
@@ -16,7 +17,7 @@ remote_state {
     bucket = local.state_bucket
 
     key            = "dev/stage_1/${path_relative_to_include()}/tofu.tfstate"
-    region         = "us-west-2"
+    region         = local.region
     encrypt        = true
     use_lockfile   = true
   }
@@ -31,7 +32,7 @@ generate "provider" {
   if_exists = "overwrite_terragrunt"
   contents = <<EOF
 provider "aws" {
-  region = "us-west-2"
+  region = "${local.region}"
 }
 EOF
 }
