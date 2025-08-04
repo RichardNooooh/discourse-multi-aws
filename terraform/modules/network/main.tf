@@ -1,4 +1,5 @@
 locals {
+  name = "discourse-vpc"
   vpc_cidr = "10.0.0.0/16"
   azs      = ["${var.region}a", "${var.region}b"]
 
@@ -6,9 +7,9 @@ locals {
   private_subnets  = ["10.0.16.0/24", "10.0.17.0/24"]  # "10.0.18.0/24", "10.0.19.0/24"
   database_subnets = ["10.0.32.0/24", "10.0.33.0/24"]  # "10.0.34.0/24", "10.0.35.0/24"
 
-  public_subnet_names   = ["public-net-1", "public-net-2"]
-  private_subnet_names  = ["private-net-1", "private-net-2"]
-  database_subnet_names = ["db-net-1", "db-net-2"]
+  public_subnet_names   = ["${local.name}-public-net-1", "${local.name}-public-net-2"]
+  private_subnet_names  = ["${local.name}-private-net-1", "${local.name}-private-net-2"]
+  database_subnet_names = ["${local.name}-db-net-1", "${local.name}-db-net-2"]
 
   project_tag = "discourse"
 }
@@ -16,7 +17,7 @@ locals {
 module "vpc" {
   source  = "git::https://github.com/terraform-aws-modules/terraform-aws-vpc.git?ref=v6.0.1"
 
-  name             = "discourse-vpc-${var.environment}" # discourse-vpc-dev, -prod
+  name             = "${local.name}-${var.environment}" # discourse-vpc-dev, -prod
   cidr             = local.vpc_cidr
   azs              = local.azs
   public_subnets   = local.public_subnets
@@ -48,16 +49,16 @@ module "vpc" {
   )
 }
 
-# module "vpc-endpoints" {
-#   source = "git::https://github.com/terraform-aws-modules/terraform-aws-vpc.git?ref=v6.0.1//modules/vpc-endpoints"
-#   vpc_id = module.vpc.vpc_id
+module "vpc-endpoints" {
+  source = "git::https://github.com/terraform-aws-modules/terraform-aws-vpc.git//modules/vpc-endpoints?ref=v6.0.1"
+  vpc_id = module.vpc.vpc_id
 
-#   endpoints = {
-#     s3 = {
-#       service = "s3"
-#       service_type = "Gateway"
-#       route_table_ids = local.private_subnets
-#       tags = {Name = "s3-vpc-endpoint"}
-#     }
-#   }
-# }
+  endpoints = {
+    s3 = {
+      service = "s3"
+      service_type = "Gateway"
+      route_table_ids = flatten([module.vpc.private_route_table_ids, module.vpc.public_route_table_ids])
+      tags = { Name = "s3-vpc-endpoint" }
+    }
+  }
+}
