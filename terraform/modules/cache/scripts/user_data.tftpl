@@ -1,0 +1,37 @@
+#!/bin/bash
+set -euo pipefail
+
+HOSTED_ZONE_ID="${hosted_zone_id}"
+RECORD_NAME="${record_name}"
+TTL=60
+# register private IP in Route 53
+LOCAL_IPV4=$(curl http://169.254.169.254/latest/meta-data/local-ipv4)
+
+# basics
+sudo yum update -y
+sudo yum install -y docker
+sudo service docker start
+systemctl enable docker
+
+# run Valkey in a container
+sudo docker run --restart always -d --name valkey -p 6379:6379 valkey/valkey:latest
+
+# https://docs.aws.amazon.com/cli/latest/reference/route53/change-resource-record-sets.html
+cat >/tmp/rrset.json <<JSON
+{
+  "Comment":  "Self-register Valkey instance",
+  "Changes": [{
+    "Action": "UPSERT",
+    "ResourceRecordSet": {
+      "Name": "${RECORD_NAME}",
+      "Type": "A",
+      "TTL": ${TTL},
+      "ResourceRecords": [{ "Value": "${LOCAL_IPV4}" }]
+    }
+  }]
+}
+JSON
+
+aws route53 change-resource-record-sets \
+     --hosted-zone-id ${HOSTED_ZONE_ID} \
+     --change-batch file:///tmp/rrset.json

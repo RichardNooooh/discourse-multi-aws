@@ -1,6 +1,8 @@
 
 locals {
+  project = "discourse"
   region = "us-west-2"
+  environment = "dev"
   state_bucket = get_env("TG_state_bucket")
   # cloudflare_api_token = get_env("TG_cloudflare_api_token")
 }
@@ -16,7 +18,7 @@ remote_state {
   config = {
     bucket = local.state_bucket
 
-    key            = "dev/stage_1/${path_relative_to_include()}/tofu.tfstate"
+    key            = "${local.environment}/stage_1/${path_relative_to_include()}/tofu.tfstate"
     region         = local.region
     encrypt        = true
     use_lockfile   = true

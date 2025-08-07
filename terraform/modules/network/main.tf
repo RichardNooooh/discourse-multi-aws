@@ -1,21 +1,27 @@
 locals {
-  name = "discourse-vpc"
+  name     = "${var.project}-${var.environment}-vpc"
   vpc_cidr = "10.0.0.0/16"
   azs      = ["${var.region}a", "${var.region}b"]
 
-  public_subnets   = ["10.0.0.0/24", "10.0.1.0/24"]    # "10.0.2.0/24", "10.0.3.0/24"
-  private_subnets  = ["10.0.16.0/24", "10.0.17.0/24"]  # "10.0.18.0/24", "10.0.19.0/24"
-  database_subnets = ["10.0.32.0/24", "10.0.33.0/24"]  # "10.0.34.0/24", "10.0.35.0/24"
+  public_subnets   = ["10.0.0.0/24", "10.0.1.0/24"]   # "10.0.2.0/24", "10.0.3.0/24"
+  private_subnets  = ["10.0.16.0/24", "10.0.17.0/24"] # "10.0.18.0/24", "10.0.19.0/24"
+  database_subnets = ["10.0.32.0/24", "10.0.33.0/24"] # "10.0.34.0/24", "10.0.35.0/24"
 
   public_subnet_names   = ["${local.name}-public-net-1", "${local.name}-public-net-2"]
   private_subnet_names  = ["${local.name}-private-net-1", "${local.name}-private-net-2"]
   database_subnet_names = ["${local.name}-db-net-1", "${local.name}-db-net-2"]
 
-  project_tag = "discourse"
+  tags = merge(
+    {
+      Project     = var.project
+      Environment = var.environment
+    },
+    var.extra_tags
+  )
 }
 
 module "vpc" {
-  source  = "git::https://github.com/terraform-aws-modules/terraform-aws-vpc.git?ref=v6.0.1"
+  source = "git::https://github.com/terraform-aws-modules/terraform-aws-vpc.git?ref=v6.0.1"
 
   name             = "${local.name}-${var.environment}" # discourse-vpc-dev, -prod
   cidr             = local.vpc_cidr
@@ -41,12 +47,7 @@ module "vpc" {
 
   enable_flow_log = false # can get expensive!! default false, but just in case it's set false
 
-  tags = merge(
-    {
-      Project = local.project_tag
-    },
-    var.extra_tags
-  )
+  tags = local.tags
 }
 
 module "vpc-endpoints" {
@@ -55,15 +56,20 @@ module "vpc-endpoints" {
 
   endpoints = {
     s3 = {
-      service = "s3"
-      service_type = "Gateway"
+      service         = "s3"
+      service_type    = "Gateway"
       route_table_ids = flatten([module.vpc.private_route_table_ids, module.vpc.public_route_table_ids])
-      tags = merge(
-        { 
-          Name = "s3-vpc-endpoint",
-          Project = local.project_tag
-        }, 
-        var.extra_tags)
+      tags            = local.tags
     }
   }
 }
+
+# private Route53 zone for cache and database
+resource "aws_route53_zone" "private" {
+  name = "${var.project}.internal"
+  vpc {
+    vpc_id = module.vpc.vpc_id
+  }
+  tags = local.tags
+}
+

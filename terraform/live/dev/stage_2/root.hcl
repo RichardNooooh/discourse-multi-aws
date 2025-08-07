@@ -1,6 +1,8 @@
 # A little bit of repetition with `stage_1`, but I don't want to orchestrate Packer with terragrunt...
 # there should be a better way....?
 locals {
+  project = "discourse"
+  region = "us-west-2"
   state_bucket = get_env("TG_state_bucket")
   # cloudflare_api_token = get_env("TG_cloudflare_api_token")
 }
@@ -17,7 +19,7 @@ remote_state {
     bucket = local.state_bucket
 
     key            = "dev/stage_2/${path_relative_to_include()}/tofu.tfstate"
-    region         = "us-west-2"
+    region         = local.region
     encrypt        = true
     use_lockfile   = true
   }

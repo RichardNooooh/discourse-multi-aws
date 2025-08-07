@@ -5,7 +5,9 @@ include "root" {
 }
 
 locals {
+  project = include.root.locals.project
   region = include.root.locals.region
+  environment = include.root.locals.environment
 }
 
 terraform {
@@ -13,9 +15,7 @@ terraform {
 }
 
 inputs = {
+  project = local.project
   region = local.region
-  environment = "dev"
-  extra_tags = {
-    Environment = "dev"
-  }
+  environment = local.environment
 }

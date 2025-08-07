@@ -1,5 +1,13 @@
 
+variable "project" {
+  type = string
+}
+
 variable "region" {
+  type = string
+}
+
+variable "environment" { # dev or prod, or whatever
   type = string
 }
 
@@ -20,12 +28,11 @@ variable "private_route_table_ids" {
 }
 
 variable "fcknat_instance" {
-  type = string
-  default = "t4g.nano"
+  type    = string
 }
 
 variable "ssh_key_name" {
-  type = string
+  type    = string
   default = null
 }
 

@@ -5,7 +5,9 @@ include "root" {
 }
 
 locals {
+  project = include.root.locals.project
   region = include.root.locals.region
+  environment = include.root.locals.environment
 }
 
 dependency "network" {
@@ -23,15 +25,16 @@ terraform {
 }
 
 inputs = {
+  project = local.project
   region = local.region
-  environment = "dev" # TODO refactor
+  environment = local.environment
 
   vpc_id                  = dependency.network.outputs.vpc_id
   public_subnets          = dependency.network.outputs.public_subnets
   private_route_table_ids = dependency.network.outputs.private_route_table_ids
   azs                     = dependency.network.outputs.azs
 
-  extra_tags = {
-    Environment = "dev" # TODO refactor
-  }
+  fcknat_instance = "t4g.nano"
+
+  ssh_key_name = get_env("TG_ssh_key_name")
 }
