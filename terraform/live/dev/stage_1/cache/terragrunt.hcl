@@ -17,15 +17,12 @@ dependency "network" {
     private_subnets        = ["subnet-aaaa1111"]
     private_hosted_zone_id = "zone-id-00000000"
   }
+  mock_outputs_allowed_terraform_commands = ["init", "validate"]
 }
 
 dependency "nat" {
   config_path = "../fck-nat"
   mock_outputs = {}
-}
-
-dependency "iam" {
-  config_path = "../iam"
 }
 
 terraform {
@@ -39,10 +36,10 @@ inputs = {
 
   vpc_id             = dependency.network.outputs.vpc_id
   private_subnet_id  = dependency.network.outputs.private_subnets[0]
-  instance_type      = "t4g.nano" # should be ARM64-based
-  # iam_instance_profile_arm = dependency.iam.. TODO
   hosted_zone_id     = dependency.network.outputs.private_hosted_zone_id
   record_name        = "cache.discourse.internal"
+
+  instance_type      = "t4g.nano" # should be ARM64-based
 
   ssh_key_name = get_env("TG_ssh_key_name")
 }

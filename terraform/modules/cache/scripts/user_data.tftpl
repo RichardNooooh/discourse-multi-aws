@@ -1,11 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
-HOSTED_ZONE_ID="${hosted_zone_id}"
-RECORD_NAME="${record_name}"
-TTL=60
 # register private IP in Route 53
 LOCAL_IPV4=$(curl http://169.254.169.254/latest/meta-data/local-ipv4)
+TTL=60
 
 # basics
 sudo yum update -y
@@ -25,8 +23,8 @@ cat >/tmp/rrset.json <<JSON
     "ResourceRecordSet": {
       "Name": "${RECORD_NAME}",
       "Type": "A",
-      "TTL": ${TTL},
-      "ResourceRecords": [{ "Value": "${LOCAL_IPV4}" }]
+      "TTL": $${TTL},
+      "ResourceRecords": [{ "Value": "$${LOCAL_IPV4}" }]
     }
   }]
 }

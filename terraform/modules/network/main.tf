@@ -23,7 +23,7 @@ locals {
 module "vpc" {
   source = "git::https://github.com/terraform-aws-modules/terraform-aws-vpc.git?ref=v6.0.1"
 
-  name             = "${local.name}-${var.environment}" # discourse-vpc-dev, -prod
+  name             = "${local.name}"
   cidr             = local.vpc_cidr
   azs              = local.azs
   public_subnets   = local.public_subnets

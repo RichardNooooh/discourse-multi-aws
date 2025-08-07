@@ -18,6 +18,7 @@ dependency "network" {
     private_route_table_ids = ["rtb-1111aaaa", "rtb-2222bbbb"]
     azs                     = ["${local.region}a", "${local.region}b"]
   }
+  mock_outputs_allowed_terraform_commands = ["init", "validate"]
 }
 
 terraform {
