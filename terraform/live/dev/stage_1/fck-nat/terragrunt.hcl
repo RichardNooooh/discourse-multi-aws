@@ -18,11 +18,11 @@ dependency "network" {
     private_route_table_ids = ["rtb-1111aaaa", "rtb-2222bbbb"]
     azs                     = ["${local.region}a", "${local.region}b"]
   }
-  mock_outputs_allowed_terraform_commands = ["init", "validate"]
+  mock_outputs_allowed_terraform_commands = ["init", "validate", "fmt"]
 }
 
 terraform {
-    source = "../../../../modules/fck-nat"
+  source = "../../../../modules/fck-nat"
 }
 
 inputs = {
@@ -36,6 +36,4 @@ inputs = {
   azs                     = dependency.network.outputs.azs
 
   fcknat_instance = "t4g.nano"
-
-  ssh_key_name = get_env("TG_ssh_key_name")
 }

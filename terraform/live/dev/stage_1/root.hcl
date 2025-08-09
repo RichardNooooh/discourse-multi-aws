@@ -3,8 +3,6 @@ locals {
   project = "discourse"
   region = "us-west-2"
   environment = "dev"
-  state_bucket = get_env("TG_state_bucket")
-  # cloudflare_api_token = get_env("TG_cloudflare_api_token")
 }
 
 remote_state {
@@ -16,7 +14,7 @@ remote_state {
   }
 
   config = {
-    bucket = local.state_bucket
+    bucket = get_env("TF_VAR_STATE_BUCKET")
 
     key            = "${local.environment}/stage_1/${path_relative_to_include()}/tofu.tfstate"
     region         = local.region
@@ -25,16 +23,16 @@ remote_state {
   }
 }
 
-# provider "cloudflare" {
-#   api_token = ${local.cloudflare_api_token}
-# }
-
 generate "provider" {
   path = "provider.tf"
   if_exists = "overwrite_terragrunt"
   contents = <<EOF
 provider "aws" {
   region = "${local.region}"
+}
+
+provider "cloudflare" {
+  api_token = ${get_env("TF_VAR_CLOUDFLARE_API_TOKEN")}
 }
 EOF
 }

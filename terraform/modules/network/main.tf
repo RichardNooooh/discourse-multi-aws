@@ -66,7 +66,7 @@ module "vpc-endpoints" {
 
 # private Route53 zone for cache and database
 resource "aws_route53_zone" "private" {
-  name = "${var.project}.internal"
+  name = "${var.project}.internal" # TODO make this `discourse-{ENV}.internal
   vpc {
     vpc_id = module.vpc.vpc_id
   }

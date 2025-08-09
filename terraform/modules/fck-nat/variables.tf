@@ -32,8 +32,9 @@ variable "fcknat_instance" {
 }
 
 variable "ssh_key_name" {
-  type    = string
-  default = null
+  type      = string
+  sensitive = true
+  default   = null
 }
 
 variable "extra_tags" {

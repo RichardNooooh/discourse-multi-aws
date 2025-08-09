@@ -27,3 +27,8 @@ output "private_hosted_zone_id" {
   description = "Zone ID of private hosted zone"
   value       = aws_route53_zone.private.zone_id
 }
+
+output "database_subnet_group" {
+  value = module.vpc.database_subnet_group
+}
+

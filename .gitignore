@@ -1,6 +1,8 @@
 env.*
 *.log
 
+.vscode/
+
 .terraform.lock.hcl
 .terraform/
 .terragrunt-cache/
