@@ -28,7 +28,7 @@ variable "private_route_table_ids" {
 }
 
 variable "fcknat_instance" {
-  type    = string
+  type = string
 }
 
 variable "ssh_key_name" {

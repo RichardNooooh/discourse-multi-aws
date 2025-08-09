@@ -14,38 +14,38 @@ locals {
 # Security Groups #
 # ############### #
 resource "aws_security_group" "alb" {
-  name = "alb-sg-${local.name}"
+  name        = "alb-sg-${local.name}"
   description = "ALB"
-  vpc_id = var.vpc_id
-  tags = local.tags
+  vpc_id      = var.vpc_id
+  tags        = local.tags
 }
 
 resource "aws_security_group" "web" {
-  name = "web-sg-${local.name}"
+  name        = "web-sg-${local.name}"
   description = "web-only containers"
-  vpc_id = var.vpc_id
-  tags = local.tags
+  vpc_id      = var.vpc_id
+  tags        = local.tags
 }
 
 resource "aws_security_group" "metrics" { # TODO
-  name = "metrics-sg-${local.name}"
+  name        = "metrics-sg-${local.name}"
   description = "Monitoring stack"
-  vpc_id = var.vpc_id
-  tags = local.tags
+  vpc_id      = var.vpc_id
+  tags        = local.tags
 }
 
 resource "aws_security_group" "cache" {
-  name = "cache-sg-${local.name}"
+  name        = "cache-sg-${local.name}"
   description = "Valkey/Redis instance"
-  vpc_id = var.vpc_id
-  tags = local.tags
+  vpc_id      = var.vpc_id
+  tags        = local.tags
 }
 
 resource "aws_security_group" "db" {
-  name = "db-sg-${local.name}"
+  name        = "db-sg-${local.name}"
   description = "PostgreSQL database"
-  vpc_id = var.vpc_id
-  tags = local.tags
+  vpc_id      = var.vpc_id
+  tags        = local.tags
 }
 
 # ############# #
