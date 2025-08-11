@@ -23,9 +23,13 @@ variable "instance_type" {
   type = string
 }
 
-# variable "iam_instance_profile_arn" {
-#   type = string
-# }
+variable "sg_cache_id" {
+  type = string
+}
+
+variable "cache_instance_arn" {
+  type = string
+}
 
 variable "hosted_zone_id" {
   type = string

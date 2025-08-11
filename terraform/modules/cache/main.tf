@@ -9,27 +9,12 @@ locals {
   )
 }
 
-resource "aws_security_group" "valkey-sg" {
-  name_prefix = "${local.name}-sg-"
-  vpc_id      = var.vpc_id
-  tags        = local.tags
-
-  # temporary
-  egress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
-}
-
 # provides the `aws` cli by default, just need to install Valkey and/or docker(?)
 data "aws_ami" "amazon_linux" {
   owners      = ["amazon"]
   most_recent = true
   filter {
-    name = "name"
+    name   = "name"
     values = ["al2023-ami-ecs-hvm-*-arm64"]
   }
 }
@@ -38,6 +23,7 @@ resource "aws_launch_template" "valkey-template" {
   name          = "${local.name}-template"
   image_id      = data.aws_ami.amazon_linux.id
   instance_type = var.instance_type
+  update_default_version = true
 
   user_data = base64encode(
     templatefile("${path.module}/scripts/user_data.tftpl", {
@@ -46,10 +32,20 @@ resource "aws_launch_template" "valkey-template" {
     })
   )
 
-  vpc_security_group_ids = [aws_security_group.valkey-sg.id]
+  block_device_mappings {
+    device_name = "/dev/sdf"
+
+    ebs {
+      delete_on_termination = true
+      volume_size           = 12
+      volume_type           = "gp3"
+    }
+  }
+
+  vpc_security_group_ids = [var.sg_cache_id]
 
   iam_instance_profile {
-    arn = aws_iam_instance_profile.cache.arn
+    arn = var.cache_instance_arn
   }
 
   credit_specification {
@@ -90,6 +86,13 @@ module "valkey-asg" {
   launch_template_id      = aws_launch_template.valkey-template.id
   launch_template_version = "$Latest"
 
+  instance_refresh = {
+    strategy = "Rolling"
+    preferences = {
+      min_healthy_percentage = 0
+    }
+  }
+
   tags = local.tags
 }
 
@@ -105,69 +108,4 @@ resource "aws_route53_record" "valkey" {
   lifecycle {
     ignore_changes = [records] # Tofu won’t revert instance-set IPs
   }
-}
-
-# ############################# #
-# IAM Role and Instance Profile #
-# ############################# #
-data "aws_iam_policy_document" "cache_assume_role" {
-  statement {
-    effect = "Allow"
-    principals {
-      type        = "Service"
-      identifiers = ["ec2.amazonaws.com"]
-    }
-    actions = ["sts:AssumeRole"]
-  }
-}
-
-resource "aws_iam_role" "cache" {
-  name = "${local.name}-iam-role"
-  assume_role_policy = data.aws_iam_policy_document.cache_assume_role.json
-  tags = local.tags
-}
-
-resource "aws_iam_instance_profile" "cache" {
-  name = "${local.name}-iam-profile"
-  role = aws_iam_role.cache.name
-  tags = local.tags
-}
-
-resource "aws_iam_role_policy_attachment" "ssm_core" {
-  role = aws_iam_role.cache.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-}
-
-# Not sure if this is needed for Prometheus monitoring
-# resource "aws_iam_role_policy_attachment" "cw_agent" {
-#   role       = aws_iam_role.cache_assume_role.name
-#   policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
-# }
-
-# ##################### #
-# Route53 UPSERT Policy #
-# ##################### #
-data "aws_iam_policy_document" "route53_upsert" {
-  statement {
-    effect = "Allow"
-    actions   = [
-      "route53:ChangeResourceRecordSets",
-      "route53:GetHostedZone",
-      "route53:ListResourceRecordSets"
-    ]
-    resources = [
-      "arn:aws:route53:::hostedzone/${var.hosted_zone_id}"
-    ]
-  }
-}
-
-resource "aws_iam_policy" "route53_upsert" {
-  name = "${local.name}-iam-route53upsert"
-  policy = data.aws_iam_policy_document.route53_upsert.json
-  tags = local.tags
-}
-
-resource "aws_iam_role_policy_attachment" "route53_upsert_attach" {
-  role = aws_iam_role.cache.name
-  policy_arn = aws_iam_policy.route53_upsert.arn
 }
