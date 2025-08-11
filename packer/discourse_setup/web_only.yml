@@ -10,7 +10,7 @@ templates:
 
 expose:
   - "80:80" # http
-  - "443:443" # https
+  # - "443:443" # again, we termiante SSL on ALB... there shouldn't be any HTTPS traffic to this container, right....?
 
 # no need for `links` since we are using RDS here
 env:
@@ -18,9 +18,17 @@ env:
   LANG: en_US.UTF-8
   LANGUAGE: en_US.UTF-8
 
+  DISCOURSE_DB_HOST: db.discourse.internal # these are internal Route53 records
+  DISCOURSE_DB_PORT: 5432
+  DISCOURSE_REDIS_HOST: cache.discourse.internal
+  DISCOURSE_REDIS_PORT: 6379
+
+  # must be true even though SSL is terminated at ALB so all content is served over HTTPS
+  DISCOURSE_FORCE_HTTPS: true
+
   # https://meta.discourse.org/t/trouble-bootstrapping-with-rds-could-not-open-certificate-file/289367
   PGSSLCERT: /tmp/postgresql.crt
-  # DISCOURSE_REDIS_USE_SSL: true  # this will be required if cache is on Elasticache
+  # DISCOURSE_REDIS_USE_SSL: true  # this is required if cache is on Elasticache
 
   DISCOURSE_CAN_PERMANENTLY_DELETE: true
 
@@ -54,6 +62,7 @@ hooks:
           - sudo -E -u discourse git clone https://github.com/discourse/discourse-cakeday.git
           - sudo -E -u discourse git clone https://github.com/discourse/discourse-saved-searches.git
           - sudo -E -u discourse git clone https://github.com/discourse/discourse-surveys.git
+          - sudo -E -u discourse git clone https://github.com/discourse/discourse-prometheus.git
   after_assets_precompile:
     - exec:
         cd: $home

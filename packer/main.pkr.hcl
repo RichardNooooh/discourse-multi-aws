@@ -7,22 +7,6 @@ packer {
   }
 }
 
-variable "ami_prefix" {
-  type = string
-}
-
-variable "build_instance" {
-  type = string
-}
-
-variable "build_volume" {
-  type = number
-}
-
-variable "aws_region" {
-  type = string
-}
-
 locals {
   timestamp = regex_replace(timestamp(), "[- TZ:]", "")
 }
@@ -31,6 +15,13 @@ source "amazon-ebs" "ubuntu" {
   ami_name      = "${var.ami_prefix}-${local.timestamp}"
   instance_type = "${var.build_instance}"
   region        = "${var.aws_region}"
+
+  vpc_id    = "vpc-0ce40a1e28601caf9" # TODO
+  subnet_id = "subnet-0f9f33e2345b857b3"
+  security_group_id = "sg-05ac785247d30a962"
+  ssh_interface = "session_manager"
+  iam_instance_profile = "discourse-dev-packer-iam-instance"
+
   source_ami_filter {
     filters = {
       name                = "ubuntu/images/*ubuntu-noble-24.04-amd64-server-*"
@@ -63,23 +54,33 @@ build {
     "source.amazon-ebs.ubuntu"
   ]
 
+  provisioner "file" {
+    source      = "discourse_setup/db_init.sql"
+    destination = "/tmp/db_init.sql"
+  }
   provisioner "shell" {
     script            = "update.sh"
     expect_disconnect = true
+    env = {
+      DB_PASSWORD="${var.db_password}"
+    }
   }
 
   provisioner "file" {
-    source       = "discourse_containers/web_only.yml"
+    source       = "discourse_setup/web_only.yml"
     destination  = "/tmp/web_only.yml"
     pause_before = "30s"
   }
   provisioner "file" { # TODO remove
-    source      = "discourse_containers/env.yml"
+    source      = "discourse_setup/env.yml"
     destination = "/tmp/env.yml"
   }
 
   provisioner "shell" {
     script = "bootstraper.sh"
+    # env = {
+    #   environment="${var.environment}"
+    # }
   }
 }
 
