@@ -29,6 +29,6 @@ output "private_hosted_zone_id" {
 }
 
 output "database_subnet_group" {
-  value = module.vpc.database_subnet_group
+  value = module.vpc.database_subnet_group_name
 }
 

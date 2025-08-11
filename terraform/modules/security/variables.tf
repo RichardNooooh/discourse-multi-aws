@@ -23,3 +23,7 @@ variable "vpc_id" {
 variable "cloudflare_prefix_list_id" {
   type = string
 }
+
+variable "hosted_zone_id" {
+  type = string
+}

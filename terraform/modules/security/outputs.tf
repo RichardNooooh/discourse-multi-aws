@@ -22,3 +22,14 @@ output "sg_db_id" {
   description = "Security Group ID of Database"
   value       = aws_security_group.db.id
 }
+
+output "cache_iam_instance_arn" {
+  description = "ARN of the cache's IAM Instance"
+  value       = aws_iam_instance_profile.cache_iam_instance_profile.arn
+}
+
+output "cache_iam_instance_name" {
+  description = "Name of packer IAM instance profile"
+  value       = aws_iam_instance_profile.packer_iam_instance_profile.name
+}
+
