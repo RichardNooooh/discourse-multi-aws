@@ -25,6 +25,15 @@ dependency "nat" {
   mock_outputs = {}
 }
 
+dependency "security" {
+  config_path = "../security"
+  mock_outputs = {
+    sg_cache_id = "sg-blahblahblah"
+    cache_iam_instance_arn = "instance-profile-asdfasdfasdfasdf"
+  }
+  mock_outputs_allowed_terraform_commands = ["init", "validate", "fmt"]
+}
+
 terraform {
     source = "../../../../modules/cache"
 }
@@ -40,4 +49,7 @@ inputs = {
   record_name        = "cache.discourse.internal"
 
   instance_type      = "t4g.nano" # should be ARM64-based
+
+  sg_cache_id = dependency.security.outputs.sg_cache_id
+  cache_instance_arn = dependency.security.outputs.cache_iam_instance_arn
 }

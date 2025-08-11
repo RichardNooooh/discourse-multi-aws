@@ -14,6 +14,7 @@ dependency "network" {
   config_path = "../network"
   mock_outputs = {
     vpc_id = "vpc-00000000"
+    hosted_zone_id = "zone-asdfasdfasdf"
   }
   mock_outputs_allowed_terraform_commands = ["init", "validate", "fmt"]
 }
@@ -37,4 +38,5 @@ inputs = {
 
   vpc_id                    = dependency.network.outputs.vpc_id
   cloudflare_prefix_list_id = dependency.ssl.outputs.cloudflare_prefix_list_id
+  hosted_zone_id            = dependency.network.outputs.private_hosted_zone_id
 }
