@@ -93,7 +93,7 @@ module "s3_backups" {
       ]
 
       expiration = {
-        days = 100 # minium: 7 days normal storage + 90 day minimum in Flexible Glacier
+        days = 100 # minimum: 7 days normal storage + 90 day minimum in Flexible Glacier
       }
 
       abort_incomplete_multipart_upload_days = 7
@@ -122,22 +122,9 @@ module "s3_metrics" {
         prefix = local.s3_access_log_location
       }
 
-      transition = [
-        {
-          days          = 7
-          storage_class = "GLACIER"
-        },
-        {
-          days          = 97
-          storage_class = "DEEP_ARCHIVE"
-        }
-      ]
-
       expiration = {
-        days = 365
+        days = 7
       }
-
-      abort_incomplete_multipart_upload_days = 7
     }
   ]
 }
