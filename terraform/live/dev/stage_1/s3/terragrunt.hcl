@@ -16,4 +16,6 @@ terraform {
 inputs = {
   project     = local.project
   environment = local.environment
+
+  force_destroy = true
 }

@@ -49,6 +49,6 @@ inputs = {
   # TODO need to watch RAM/CPU
   instance_type = "t4g.nano" # should be ARM64-based
 
-  sg_cache_id        = dependency.security.outputs.sg_cache_id
-  cache_instance_arn = dependency.security.outputs.cache_iam_instance_arn
+  sg_cache_id            = dependency.security.outputs.sg_cache_id
+  cache_iam_instance_arn = dependency.security.outputs.cache_iam_instance_arn
 }

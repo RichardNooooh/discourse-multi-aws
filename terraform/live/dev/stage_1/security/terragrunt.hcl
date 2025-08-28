@@ -26,6 +26,15 @@ dependency "ssl" {
   mock_outputs_allowed_terraform_commands = ["init", "validate", "fmt"]
 }
 
+dependency "s3" {
+  config_path = "../s3"
+  mock_outputs = {
+    s3_uploads_bucket_arn = "arn:::asdfasdfasdf"
+    s3_backups_bucket_arn = "arn:::asdfasdfasdf"
+  }
+  mock_outputs_allowed_terraform_commands = ["init", "validate", "fmt"]
+}
+
 terraform {
   source = "../../../../modules/security"
 }
@@ -37,4 +46,7 @@ inputs = {
   vpc_id                    = dependency.network.outputs.vpc_id
   cloudflare_prefix_list_id = dependency.ssl.outputs.cloudflare_prefix_list_id
   hosted_zone_id            = dependency.network.outputs.private_hosted_zone_id
+
+  s3_uploads_bucket_arn = dependency.s3.outputs.s3_uploads_bucket_arn
+  s3_backups_bucket_arn = dependency.s3.outputs.s3_backups_bucket_arn
 }

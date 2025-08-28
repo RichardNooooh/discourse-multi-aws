@@ -29,6 +29,10 @@ variable "public_subnets" {
   type = list(string)
 }
 
+variable "private_subnets" {
+  type = list(string)
+}
+
 # ######### #
 # S3 Module #
 # ######### #
@@ -55,6 +59,10 @@ variable "webonly_iam_instance_arn" {
   type = string
 }
 
+variable "sg_alb_id" {
+  type = string
+}
+
 variable "sg_web_id" {
   type = string
 }
@@ -66,11 +74,23 @@ variable "webonly_image_id" { # specified by command line?
   type = string
 }
 
-# #################### #
-# Environment-Specific #
-# #################### #
+# ############################### #
+# Environment-Specific and Config #
+# ############################### #
 variable "webonly_instance_type" {
   type = string
+}
+
+variable "min_size" {
+  type = number
+}
+
+variable "desired_capacity" {
+  type = number
+}
+
+variable "max_size" {
+  type = number
 }
 
 # ####### #

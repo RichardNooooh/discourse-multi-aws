@@ -20,7 +20,7 @@ module "alb" {
   subnets = var.public_subnets
 
   enable_deletion_protection = false # TODO temporary
-  security_groups            = [var.alb_security_group]
+  security_groups            = [var.sg_alb_id]
   idle_timeout               = 90
 
   access_logs = { # TODO lifecycle rules on alb logs
@@ -84,7 +84,7 @@ locals {
 }
 
 resource "cloudflare_dns_record" "alb_record" {
-  for_each = { for record in local.cloudflare_env_records : n => n }
+  for_each = local.cloudflare_env_records
 
   zone_id = var.cloudflare_zone_id
   name    = each.key
@@ -130,7 +130,7 @@ resource "aws_launch_template" "webonly_template" {
 module "asg" {
   source              = "git::https://github.com/terraform-aws-modules/terraform-aws-autoscaling?ref=v9.0.1"
   name                = "${local.name}-asg"
-  vpc_zone_identifier = var.private_subnet_ids
+  vpc_zone_identifier = var.private_subnets
 
   min_size         = var.min_size
   desired_capacity = var.desired_capacity
@@ -140,7 +140,12 @@ module "asg" {
   health_check_grace_period = 150
 
   # connecting to ALB
-  target_group_arns = [module.alb.target_groups["web_only"].arn]
+  traffic_source_attachments = {
+    ex-alb = {
+      traffic_source_identifier = module.alb.target_groups["web_only"].arn
+      traffic_source_type       = "elbv2"
+    }
+  }
 
   create_launch_template  = false
   launch_template_id      = aws_launch_template.webonly_template.id
