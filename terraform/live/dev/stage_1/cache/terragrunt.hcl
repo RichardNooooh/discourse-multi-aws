@@ -6,7 +6,6 @@ include "root" {
 
 locals {
   project     = include.root.locals.project
-  region      = include.root.locals.region
   environment = include.root.locals.environment
 }
 
@@ -40,7 +39,6 @@ terraform {
 
 inputs = {
   project     = local.project
-  region      = local.region
   environment = local.environment
 
   vpc_id            = dependency.network.outputs.vpc_id

@@ -6,7 +6,6 @@ include "root" {
 
 locals {
   project     = include.root.locals.project
-  region      = include.root.locals.region
   environment = include.root.locals.environment
 }
 
@@ -16,7 +15,7 @@ dependency "network" {
     vpc_id                  = "vpc-00000000"
     public_subnets          = ["subnet-aaaa1111", "subnet-bbbb2222"]
     private_route_table_ids = ["rtb-1111aaaa", "rtb-2222bbbb"]
-    azs                     = ["${local.region}a", "${local.region}b"]
+    azs                     = ["us-nowherea", "us-nowhereb"]
   }
   mock_outputs_allowed_terraform_commands = ["init", "validate", "fmt"]
 }
@@ -27,7 +26,6 @@ terraform {
 
 inputs = {
   project     = local.project
-  region      = local.region
   environment = local.environment
 
   vpc_id                  = dependency.network.outputs.vpc_id

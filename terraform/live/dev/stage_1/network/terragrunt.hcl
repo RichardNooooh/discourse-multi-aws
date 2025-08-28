@@ -6,8 +6,8 @@ include "root" {
 
 locals {
   project     = include.root.locals.project
-  region      = include.root.locals.region
   environment = include.root.locals.environment
+  region      = include.root.locals.region
 }
 
 terraform {
@@ -16,6 +16,6 @@ terraform {
 
 inputs = {
   project     = local.project
-  region      = local.region
   environment = local.environment
+  region      = local.region
 }
