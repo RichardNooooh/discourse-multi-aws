@@ -12,14 +12,11 @@ sudo sysctl -w vm.swappiness=10
 echo vm.swappiness = 10 | sudo tee -a /etc/sysctl.conf
 
 echo "Bootstrapping image..."
-sudo git clone https://github.com/discourse/discourse_docker.git /var/discourse
 sudo mv /tmp/web_only.yml /var/discourse/containers
-sudo mv /tmp/env.yml /var/discourse
 
 cd /var/discourse
 sudo chmod 700 containers
 sudo chmod 700 containers/web_only.yml
-sudo chmod 700 env.yml
 sudo ./launcher bootstrap web_only
 
 # TODO check time synching

@@ -57,11 +57,30 @@ build {
     source      = "discourse_setup/db_init.sql"
     destination = "/tmp/db_init.sql"
   }
+
   provisioner "shell" {
-    script            = "update.sh"
-    expect_disconnect = true
+    script = "scripts/update.sh"
     env = {
-      DB_PASSWORD="${var.db_password}"
+      DB_PASSWORD = "${var.DB_PASSWORD}"
+    }
+
+    expect_disconnect = true
+  }
+
+  provisioner "shell" {
+    script = "scripts/create_secrets.sh"
+    env = {
+      HOSTNAME            = "${var.HOSTNAME}"
+      DEVELOPER_EMAILS    = "${var.DEVELOPER_EMAILS}"
+      SMTP_ADDRESS        = "${var.SMTP_ADDRESS}"
+      SMTP_PORT           = "${var.SMTP_PORT}"
+      SMTP_USER_NAME      = "${var.SMTP_USER_NAME}"
+      SMTP_PASSWORD       = "${var.SMTP_PASSWORD}"
+      DB_PASSWORD         = "${var.DB_PASSWORD}"
+      S3_UPLOADS_BUCKET   = "${var.S3_UPLOADS_BUCKET}"
+      S3_BACKUPS_BUCKET   = "${var.S3_BACKUPS_BUCKET}"
+      MAXMIND_ACCOUNT_ID  = "${var.MAXMIND_ACCOUNT_ID}"
+      MAXMIND_LICENSE_KEY = "${var.MAXMIND_LICENSE_KEY}"
     }
   }
 
@@ -70,13 +89,9 @@ build {
     destination  = "/tmp/web_only.yml"
     pause_before = "30s"
   }
-  provisioner "file" { # TODO remove
-    source      = "discourse_setup/env.yml"
-    destination = "/tmp/env.yml"
-  }
 
   provisioner "shell" {
-    script = "bootstraper.sh"
+    script = "scripts/bootstraper.sh"
   }
 }
 

@@ -34,4 +34,8 @@ sudo apt-get update
 sudo DEBIAN_FRONTEND=noninteractive apt-get -y install postgresql-client-15 # might want to make this a variable for future upgrades...
 sudo PGPASSWORD=${DB_PASSWORD} psql --file="/tmp/db_init.sql" --host=db.discourse.internal --port=5432 --username=postgres --dbname=discourse
 
+echo "Cloning Discourse"
+sudo git clone https://github.com/discourse/discourse_docker.git /var/discourse
+
+echo "Rebooting"
 sudo reboot

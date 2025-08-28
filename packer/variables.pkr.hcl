@@ -18,11 +18,7 @@ variable "environment" {
   type = string
 }
 
-variable "db_password" {
-  type      = string
-  sensitive = true
-}
-
+# Terraform Variables
 variable "vpc_id" {
   type = string
 }
@@ -37,4 +33,60 @@ variable security_group_id {
 
 variable iam_instance_profile_name {
   type = string
+}
+
+# Secrets
+variable "HOSTNAME" {
+  type      = string
+  sensitive = true
+}
+
+variable "DEVELOPER_EMAILS" {
+  type      = string
+  sensitive = true
+}
+
+variable "SMTP_ADDRESS" {
+  type      = string
+  sensitive = true
+}
+
+variable "SMTP_PORT" {
+  type      = string
+  sensitive = true
+}
+
+variable "SMTP_USER_NAME" {
+  type      = string
+  sensitive = true
+}
+
+variable "SMTP_PASSWORD" {
+  type      = string
+  sensitive = true
+}
+
+variable "DB_PASSWORD" {
+  type      = string
+  sensitive = true
+}
+
+variable "S3_UPLOADS_BUCKET" {
+  type      = string
+  sensitive = true
+}
+
+variable "S3_BACKUPS_BUCKET" {
+  type      = string
+  sensitive = true
+}
+
+variable "MAXMIND_ACCOUNT_ID" {
+  type      = string
+  sensitive = true
+}
+
+variable "MAXMIND_LICENSE_KEY" {
+  type      = string
+  sensitive = true
 }

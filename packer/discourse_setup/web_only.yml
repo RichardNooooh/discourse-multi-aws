@@ -6,7 +6,7 @@ templates:
   - "templates/cloudflare.template.yml"
   # should be written at runtime in Github Actions
   # ensures environmental variables are set correctly at bootstrap w/o showing them here
-  - "env.yml"
+  - "secrets.yml"
 
 expose:
   - "80:80" # http
@@ -24,6 +24,8 @@ env:
   DISCOURSE_REDIS_HOST: cache.discourse.internal
   DISCOURSE_REDIS_PORT: 6379
 
+  DISCOURSE_S3_USE_IAM_PROFILE: true
+
   # must be true even though SSL is terminated at ALB so all content is served over HTTPS
   DISCOURSE_FORCE_HTTPS: true
 
@@ -33,7 +35,7 @@ env:
 
   # DISCOURSE_CAN_PERMANENTLY_DELETE: true
 
-  UNICORN_WORKERS: 2 # raise when we increase CPU size of instance
+  UNICORN_WORKERS: 4 # raise when we increase CPU size of instance
 
   DISCOURSE_USE_S3: true
   DISCOURSE_S3_REGION: us-west-2
