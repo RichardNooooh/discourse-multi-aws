@@ -7,20 +7,20 @@ Standardized wrapper around the `terraform-aws-vpc` module to maintain consisten
 | Name | Version |
 |------|---------|
 | `terraform` | >= 1.0 |
-| `aws` | >= 6.0 |
+| `aws` | ~> 6.10 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| `aws` | >= 6.0 |
+| `aws` | ~> 6.10 |
 
 ## Modules
 
 | Name | Version |
 |------|---------|
-| `terraform-aws-vpc` | >= 6.0 |
-| `terraform-aws-vpc//modules/vpc-endpoints` | >= 6.0 |
+| `terraform-aws-vpc` | ~> 6.10 |
+| `terraform-aws-vpc//modules/vpc-endpoints` | ~> 6.10 |
 | `terraform-aws-fck-nat` | >= 1.3 |
 
 ## Inputs

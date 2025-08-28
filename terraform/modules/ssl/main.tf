@@ -41,7 +41,7 @@ resource "aws_ec2_managed_prefix_list_entry" "cloudflare_ipv4" {
 # ####################################### #
 resource "aws_acm_certificate" "this" {
   domain_name               = var.hostname
-  subject_alternative_names = ["www.${var.hostname}"]
+  subject_alternative_names = ["www.${var.hostname}", "dev.${var.hostname}"]
   validation_method         = "DNS"
 
   tags = local.tags

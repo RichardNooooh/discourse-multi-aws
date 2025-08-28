@@ -44,6 +44,8 @@ inputs = {
   hosted_zone_id = dependency.network.outputs.private_hosted_zone_id
   record_name    = "db.discourse.internal"
 
+  skip_final_snapshot = true
+
   engine_version                   = "15.13"
   db_parameter_group_name          = "postgres15"
   db_parameter_group_major_version = "15"

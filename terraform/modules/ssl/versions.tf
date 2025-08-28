@@ -4,7 +4,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = ">= 6.0" # the vpc module requires aws to be at least 6.0
+      version = "~> 6.10"
     }
     http = {
       source  = "hashicorp/http"
@@ -12,7 +12,7 @@ terraform {
     }
     cloudflare = {
       source  = "cloudflare/cloudflare"
-      version = ">= 5.8"
+      version = "~> 5.8"
     }
   }
 }

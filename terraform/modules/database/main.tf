@@ -18,6 +18,8 @@ module "postgres_rds" {
   engine_lifecycle_support = "open-source-rds-extended-support-disabled" # expensive if enabled!!
   instance_class           = var.instance_size
 
+  skip_final_snapshot = var.skip_final_snapshot
+
   family                 = var.db_parameter_group_name
   major_engine_version   = var.db_parameter_group_major_version
   db_subnet_group_name   = var.database_subnet_group

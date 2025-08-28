@@ -18,8 +18,9 @@ module "alb" {
   name    = "${local.name}-alb"
   vpc_id  = var.vpc_id
   subnets = var.public_subnets
-
+  
   enable_deletion_protection = false # TODO temporary
+  create_security_group      = false
   security_groups            = [var.sg_alb_id]
   idle_timeout               = 90
 
@@ -50,6 +51,8 @@ module "alb" {
         matcher             = "200"
         path                = "/srv/status" # https://meta.discourse.org/t/health-check-api/119458
       }
+
+      create_attachment = false
     }
   }
 
@@ -87,7 +90,7 @@ resource "cloudflare_dns_record" "alb_record" {
   for_each = local.cloudflare_env_records
 
   zone_id = var.cloudflare_zone_id
-  name    = each.key
+  name    = each.value
   type    = "CNAME"
   content = module.alb.dns_name
   ttl     = 1 # automatic

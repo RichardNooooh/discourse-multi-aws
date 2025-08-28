@@ -18,6 +18,11 @@ variable "extra_tags" {
   default = {}
 }
 
+variable "skip_final_snapshot" {
+  type = bool
+  default = false
+}
+
 variable "vpc_id" {
   type = string
 }
