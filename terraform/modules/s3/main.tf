@@ -107,7 +107,7 @@ module "s3_backups" {
 module "s3_telemetry" {
   source = "git::https://github.com/terraform-aws-modules/terraform-aws-s3-bucket.git?ref=v5.4.0"
 
-  bucket        = local.obs_name
+  bucket        = local.telemetry_name
   force_destroy = var.force_destroy
 
   attach_elb_log_delivery_policy            = true

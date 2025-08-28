@@ -1,7 +1,7 @@
 
 locals {
-  project = "discourse"
-  region = "us-west-2"
+  project     = "discourse"
+  region      = "us-west-2"
   environment = "dev"
 }
 
@@ -16,27 +16,23 @@ remote_state {
   config = {
     bucket = get_env("TF_VAR_STATE_BUCKET")
 
-    key            = "${local.environment}/stage_1/${path_relative_to_include()}/tofu.tfstate"
-    region         = local.region
-    encrypt        = true
-    use_lockfile   = true
+    key          = "${local.environment}/stage_2/${path_relative_to_include()}/tofu.tfstate"
+    region       = local.region
+    encrypt      = true
+    use_lockfile = true
   }
 }
 
 generate "provider" {
-  path = "provider.tf"
+  path      = "provider.tf"
   if_exists = "overwrite_terragrunt"
-  contents = <<EOF
+  contents  = <<EOF
 provider "aws" {
   region = "${local.region}"
 }
 
 provider "cloudflare" {
-  api_token = ${get_env("TF_VAR_CLOUDFLARE_API_TOKEN")}
+  api_token = "${get_env("TF_VAR_CLOUDFLARE_API_TOKEN")}"
 }
 EOF
 }
-
-# inputs = {
-
-# }

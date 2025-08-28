@@ -16,4 +16,5 @@ terraform {
 inputs = {
   project     = local.project
   environment = local.environment
+  # cloudflare_zone_id provided by environmental variable
 }

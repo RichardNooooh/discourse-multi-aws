@@ -28,11 +28,7 @@ output "cache_iam_instance_arn" {
   value       = aws_iam_instance_profile.cache_iam_instance_profile.arn
 }
 
-output "cache_iam_instance_name" {
-  description = "Name of packer IAM instance profile"
-  value       = aws_iam_instance_profile.packer_iam_instance_profile.name
-}
-
 output "webonly_iam_instance_arn" {
+  description = "Name of web-only IAM instance profile"
   value = aws_iam_instance_profile.webonly_iam_instance_profile.arn
 }
