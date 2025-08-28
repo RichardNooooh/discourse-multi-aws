@@ -1,12 +1,12 @@
 
 include "root" {
-  path = find_in_parent_folders("root.hcl")
+  path   = find_in_parent_folders("root.hcl")
   expose = true
 }
 
 locals {
-  project = include.root.locals.project
-  region = include.root.locals.region
+  project     = include.root.locals.project
+  region      = include.root.locals.region
   environment = include.root.locals.environment
 }
 
@@ -26,8 +26,8 @@ terraform {
 }
 
 inputs = {
-  project = local.project
-  region = local.region
+  project     = local.project
+  region      = local.region
   environment = local.environment
 
   vpc_id                  = dependency.network.outputs.vpc_id

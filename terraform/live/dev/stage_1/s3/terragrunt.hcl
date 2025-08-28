@@ -11,7 +11,7 @@ locals {
 }
 
 terraform {
-  source = "../../../../modules/ssl"
+  source = "../../../../modules/s3"
 }
 
 inputs = {

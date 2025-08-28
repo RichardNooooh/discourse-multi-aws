@@ -1,20 +1,20 @@
 
 include "root" {
-  path = find_in_parent_folders("root.hcl")
+  path   = find_in_parent_folders("root.hcl")
   expose = true
 }
 
 locals {
-  project = include.root.locals.project
-  region = include.root.locals.region
+  project     = include.root.locals.project
+  region      = include.root.locals.region
   environment = include.root.locals.environment
 }
 
 dependency "network" {
   config_path = "../network"
   mock_outputs = {
-    vpc_id = "vpc-00000000"
-    hosted_zone_id = "zone-asdfasdfasdf"
+    vpc_id                 = "vpc-00000000"
+    private_hosted_zone_id = "zone-asdfasdfasdf"
   }
   mock_outputs_allowed_terraform_commands = ["init", "validate", "fmt"]
 }
@@ -32,8 +32,8 @@ terraform {
 }
 
 inputs = {
-  project = local.project
-  region = local.region
+  project     = local.project
+  region      = local.region
   environment = local.environment
 
   vpc_id                    = dependency.network.outputs.vpc_id
