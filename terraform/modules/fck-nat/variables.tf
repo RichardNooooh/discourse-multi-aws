@@ -1,14 +1,16 @@
 
 variable "project" {
-  type = string
+  type     = string
+  nullable = false
 }
 
-variable "region" {
-  type = string
-}
-
-variable "environment" { # dev or prod, or whatever
-  type = string
+variable "environment" {
+  type     = string
+  nullable = false
+  validation {
+    condition     = contains(["dev", "prod"], var.environment)
+    error_message = "environment must be one of: dev, prod."
+  }
 }
 
 variable "azs" {

@@ -10,11 +10,9 @@ locals {
   )
 }
 
-# resource "aws_key_pair" "ssh_access_key" {
-#   key_name   = "~/.ssh/aws_id_rsa"
-#   public_key = file("~/.ssh/aws_id_rsa.pub")
-# }
-
+# #################### #
+# IAM Policy Documents #
+# #################### #
 data "aws_iam_policy_document" "ec2_assume_role" {
   statement {
     effect = "Allow"
@@ -26,41 +24,83 @@ data "aws_iam_policy_document" "ec2_assume_role" {
   }
 }
 
-# ############################ #
-# IAM for `web_only` instances #
-# ############################ #
 # S3 IAM access
-# data "aws_iam_policy_document" "web_s3" {
-#   # Object-level CRUD
+# https://meta.discourse.org/t/set-up-file-and-image-uploads-to-s3/7229/270
+data "aws_iam_policy_document" "discourse_s3" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:List*",
+      "s3:Get*",
+      "s3:AbortMultipartUpload",
+      "s3:DeleteObject",
+      "s3:PutObject",
+      "s3:PutObjectAcl",
+      "s3:PutObjectVersionAcl",
+      "s3:PutLifecycleConfiguration", # TODO check this
+      # "s3:CreateBucket", # we already create the buckets
+      "s3:PutBucketCORS"
+    ]
+    resources = [
+      "${var.s3_uploads_bucket_arn}",
+      "${var.s3_uploads_bucket_arn}/*",
+      "${var.s3_backups_bucket_arn}",
+      "${var.s3_backups_bucket_arn}/*",
+    ]
+  }
+  statement {
+    effect    = "Allow"
+    actions   = ["s3:ListAllMyBuckets", "s3:ListBucket"]
+    resources = ["*"]
+  }
+}
+
+# https://developer.hashicorp.com/packer/integrations/hashicorp/amazon#iam-task-or-instance-role
+# this is for GitHub Actions
+# data "aws_iam_policy_document" "packer_policies" {
 #   statement {
-#     sid     = "ObjectRW"
-#     effect  = "Allow"
-      # actions = [
-      # "s3:List*",
-      # "s3:Get*",
-      # "s3:AbortMultipartUpload",
-      # "s3:DeleteObject",
-      # "s3:PutObject",
-      # "s3:PutObjectAcl",
-      # "s3:PutObjectVersionAcl",
-      # "s3:PutLifecycleConfiguration",
-      # "s3:CreateBucket",
-      # "s3:PutBucketCORS"
+#     effect = "Allow"
+#     actions = [
+#       "ec2:AttachVolume",
+#       "ec2:AuthorizeSecurityGroupIngress",
+#       "ec2:CopyImage",
+#       "ec2:CreateImage",
+#       "ec2:CreateKeyPair",
+#       "ec2:CreateSecurityGroup",
+#       "ec2:CreateSnapshot",
+#       "ec2:CreateTags",
+#       "ec2:CreateVolume",
+#       "ec2:DeleteKeyPair",
+#       "ec2:DeleteSecurityGroup",
+#       "ec2:DeleteSnapshot",
+#       "ec2:DeleteVolume",
+#       "ec2:DeregisterImage",
+#       "ec2:DescribeImageAttribute",
+#       "ec2:DescribeImages",
+#       "ec2:DescribeInstances",
+#       "ec2:DescribeInstanceStatus",
+#       "ec2:DescribeRegions",
+#       "ec2:DescribeSecurityGroups",
+#       "ec2:DescribeSnapshots",
+#       "ec2:DescribeSubnets",
+#       "ec2:DescribeTags",
+#       "ec2:DescribeVolumes",
+#       "ec2:DetachVolume",
+#       "ec2:GetPasswordData",
+#       "ec2:ModifyImageAttribute",
+#       "ec2:ModifyInstanceAttribute",
+#       "ec2:ModifySnapshotAttribute",
+#       "ec2:RegisterImage",
+#       "ec2:RunInstances",
+#       "ec2:StopInstances",
+#       "ec2:TerminateInstances"
 #     ]
-#     resources = local.object_arns
-#   }
-#   # Account-wide listing
-#   statement {
-#     sid     = "ListAllMyBuckets"
-#     effect  = "Allow"
-#     actions = ["s3:ListAllMyBuckets"]
-#     resources = ["*"]
+#     resources = [
+#       "*"
+#     ]
 #   }
 # }
 
-# ######################### #
-# IAM for `cache` instances #
-# ######################### #
 data "aws_iam_policy_document" "route53_upsert" {
   statement {
     effect = "Allow"
@@ -75,97 +115,62 @@ data "aws_iam_policy_document" "route53_upsert" {
   }
 }
 
-resource "aws_iam_role" "cache_iam" {
-  name               = "${local.name}-cache-role"
+# ############################ #
+# IAM for `web_only` instances #
+# ############################ #
+resource "aws_iam_role" "webonly_iam" {
+  name               = "${local.name}-webonly-iam-role"
   assume_role_policy = data.aws_iam_policy_document.ec2_assume_role.json
   tags               = local.tags
 }
 
-resource "aws_iam_role_policy_attachment" "cache_iam_ssm_core" {
-  role       = aws_iam_role.cache_iam.name
+resource "aws_iam_role_policy" "webonly_iam_s3" {
+  role   = aws_iam_role.webonly_iam.id
+  name   = "${local.name}-webonly-iam-s3-policy"
+  policy = data.aws_iam_policy_document.discourse_s3.json
+}
+
+resource "aws_iam_role_policy_attachment" "webonly_iam_ssm_core" {
+  role       = aws_iam_role.webonly_iam.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
-resource "aws_iam_role_policy" "cache_iam_route53" {
-  role     = aws_iam_role.cache_iam.id
-  name     = "${local.name}-cache-iam-route53"
-  policy   = data.aws_iam_policy_document.route53_upsert.json
+resource "aws_iam_instance_profile" "webonly_iam_instance_profile" {
+  name = "${local.name}-webonly-iam-instance"
+  role = aws_iam_role.webonly_iam.name
+}
+
+# ######################### #
+# IAM for `cache` instances #
+# ######################### #
+# assume_role_policy is the "trust" policy of who/what can *assume* this policy
+resource "aws_iam_role" "cache_iam_role" {
+  name               = "${local.name}-cache-iam-role"
+  assume_role_policy = data.aws_iam_policy_document.ec2_assume_role.json
+  tags               = local.tags
+}
+
+resource "aws_iam_role_policy" "cache_route53_policy" {
+  role   = aws_iam_role.cache_iam_role.id
+  name   = "${local.name}-cache-iam-route53"
+  policy = data.aws_iam_policy_document.route53_upsert.json
+}
+
+resource "aws_iam_role_policy_attachment" "cache_iam_ssm_core" {
+  role       = aws_iam_role.cache_iam_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
 resource "aws_iam_instance_profile" "cache_iam_instance_profile" {
   name = "${local.name}-cache-iam-instance"
-  role = aws_iam_role.cache_iam.name
+  role = aws_iam_role.cache_iam_role.name
 }
 
-# ####################### #
-# Plain `packer` IAM Role #
-# ####################### #
-# https://developer.hashicorp.com/packer/integrations/hashicorp/amazon#iam-task-or-instance-role
-data "aws_iam_policy_document" "packer_policies" {
-  statement {
-    effect = "Allow"
-    actions = [
-      "ec2:AttachVolume",
-      "ec2:AuthorizeSecurityGroupIngress",
-      "ec2:CopyImage",
-      "ec2:CreateImage",
-      "ec2:CreateKeyPair",
-      "ec2:CreateSecurityGroup",
-      "ec2:CreateSnapshot",
-      "ec2:CreateTags",
-      "ec2:CreateVolume",
-      "ec2:DeleteKeyPair",
-      "ec2:DeleteSecurityGroup",
-      "ec2:DeleteSnapshot",
-      "ec2:DeleteVolume",
-      "ec2:DeregisterImage",
-      "ec2:DescribeImageAttribute",
-      "ec2:DescribeImages",
-      "ec2:DescribeInstances",
-      "ec2:DescribeInstanceStatus",
-      "ec2:DescribeRegions",
-      "ec2:DescribeSecurityGroups",
-      "ec2:DescribeSnapshots",
-      "ec2:DescribeSubnets",
-      "ec2:DescribeTags",
-      "ec2:DescribeVolumes",
-      "ec2:DetachVolume",
-      "ec2:GetPasswordData",
-      "ec2:ModifyImageAttribute",
-      "ec2:ModifyInstanceAttribute",
-      "ec2:ModifySnapshotAttribute",
-      "ec2:RegisterImage",
-      "ec2:RunInstances",
-      "ec2:StopInstances",
-      "ec2:TerminateInstances"
-    ]
-    resources = [
-      "*"
-    ]
-  }
-}
-
-resource "aws_iam_role" "packer_iam" {
-  name               = "${local.name}-packer-role"
-  assume_role_policy = data.aws_iam_policy_document.ec2_assume_role.json
-  tags               = local.tags
-}
-
-resource "aws_iam_role_policy_attachment" "packer_iam_ssm_core" {
-  role       = aws_iam_role.packer_iam.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-}
-
-resource "aws_iam_role_policy" "packer_iam_ec2" {
-  role     = aws_iam_role.packer_iam.id
-  name     = "${local.name}-packer-iam-policy"
-  policy   = data.aws_iam_policy_document.packer_policies.json
-}
-
-resource "aws_iam_instance_profile" "packer_iam_instance_profile" {
-  name = "${local.name}-packer-iam-instance"
-  role = aws_iam_role.packer_iam.name
-}
+# # ######################## #
+# # IAM for `packer` runner  #
+# # ######################## #
+#! Turns out the packer-specific policy is only needed by the box running Packer itself, i.e. GitHub Actions, not the temporary instance itself
+# TODO
 
 # ############### #
 # Security Groups #
@@ -184,8 +189,8 @@ resource "aws_security_group" "web" {
   tags        = local.tags
 }
 
-resource "aws_security_group" "metrics" { # TODO
-  name        = "${local.name}-metrics-sg"
+resource "aws_security_group" "telemetry" { # TODO
+  name        = "${local.name}-telemetry-sg"
   description = "Monitoring stack"
   vpc_id      = var.vpc_id
   tags        = local.tags
@@ -276,11 +281,11 @@ resource "aws_vpc_security_group_egress_rule" "web_https_to_internet" {
 }
 
 resource "aws_vpc_security_group_egress_rule" "web_tcp_to_db" {
-  security_group_id = aws_security_group.web.id
+  security_group_id            = aws_security_group.web.id
   referenced_security_group_id = aws_security_group.db.id
-  from_port         = 5432
-  to_port           = 5432
-  ip_protocol       = "tcp"
+  from_port                    = 5432
+  to_port                      = 5432
+  ip_protocol                  = "tcp"
 }
 
 resource "aws_vpc_security_group_egress_rule" "web_tcp_to_cache" {

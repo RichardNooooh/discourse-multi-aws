@@ -11,9 +11,9 @@ echo "IPv4 obtained: $${LOCAL_IPV4}"
 
 # basics
 sudo yum update -y
-sudo yum install -y docker
+sudo yum install -y docker htop
 sudo service docker start
-systemctl enable docker
+sudo systemctl enable docker
 
 # TODO configure some docker logging management solution so instance doesn't die after a few weeks
 
@@ -39,3 +39,4 @@ JSON
 aws route53 change-resource-record-sets \
      --hosted-zone-id ${HOSTED_ZONE_ID} \
      --change-batch file:///tmp/rrset.json
+# TODO configure this with systemd

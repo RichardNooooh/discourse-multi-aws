@@ -1,14 +1,16 @@
 
 variable "project" {
-  type = string
-}
-
-variable "region" {
-  type = string
+  type     = string
+  nullable = false
 }
 
 variable "environment" {
-  type = string
+  type     = string
+  nullable = false
+  validation {
+    condition     = contains(["dev", "prod"], var.environment)
+    error_message = "environment must be one of: dev, prod."
+  }
 }
 
 variable "vpc_id" {
@@ -27,7 +29,7 @@ variable "sg_cache_id" {
   type = string
 }
 
-variable "cache_instance_arn" {
+variable "cache_iam_instance_arn" {
   type = string
 }
 

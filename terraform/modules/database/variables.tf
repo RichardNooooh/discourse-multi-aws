@@ -1,14 +1,16 @@
 
 variable "project" {
-  type = string
-}
-
-variable "region" {
-  type = string
+  type     = string
+  nullable = false
 }
 
 variable "environment" {
-  type = string
+  type     = string
+  nullable = false
+  validation {
+    condition     = contains(["dev", "prod"], var.environment)
+    error_message = "environment must be one of: dev, prod."
+  }
 }
 
 variable "extra_tags" {
@@ -25,11 +27,11 @@ variable "engine_version" {
 }
 
 variable "db_parameter_group_name" {
-  type    = string
+  type = string
 }
 
 variable "db_parameter_group_major_version" {
-  type    = string
+  type = string
 }
 
 variable "instance_size" {

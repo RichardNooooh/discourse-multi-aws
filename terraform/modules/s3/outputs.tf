@@ -8,8 +8,13 @@ output "s3_backups_bucket_arn" {
   value       = module.s3_backups.s3_bucket_arn
 }
 
-output "s3_metrics_bucket_arn" {
-  description = "ARN of metrics bucket"
-  value       = module.s3_metrics.s3_bucket_arn
+output "s3_telemetry_bucket_arn" {
+  description = "ARN of telemetry bucket"
+  value       = module.s3_telemetry.s3_bucket_arn
+}
+
+output "s3_telemetry_bucket_id" {
+  description = "Name of telemetry bucket"
+  value       = module.s3_telemetry.s3_bucket_id
 }
 

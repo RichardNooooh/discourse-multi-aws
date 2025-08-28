@@ -40,9 +40,9 @@ resource "aws_ec2_managed_prefix_list_entry" "cloudflare_ipv4" {
 # ACM SSL Certificate with CloudFlare DNS #
 # ####################################### #
 resource "aws_acm_certificate" "this" {
-  domain_name       = var.hostname
+  domain_name               = var.hostname
   subject_alternative_names = ["www.${var.hostname}"]
-  validation_method = "DNS"
+  validation_method         = "DNS"
 
   tags = local.tags
 
@@ -72,14 +72,14 @@ resource "cloudflare_dns_record" "acm_validation" {
   type    = each.value.type
   content = each.value.record
   ttl     = 1 # automatic
-  
+
   # tags    = ["managed:opentofu"] # tags are only available for paid plans
   comment = "AWS ACM SSL Validation"
 }
 
 resource "aws_acm_certificate_validation" "this" {
   certificate_arn         = aws_acm_certificate.this.arn
-  validation_record_fqdns = [ for v in local.acm_dvo : v.name ]
-  depends_on              = [ cloudflare_dns_record.acm_validation ]
+  validation_record_fqdns = [for v in local.acm_dvo : v.name]
+  depends_on              = [cloudflare_dns_record.acm_validation]
 }
 

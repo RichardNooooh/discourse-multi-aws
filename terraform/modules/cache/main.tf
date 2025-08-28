@@ -19,10 +19,10 @@ data "aws_ami" "amazon_linux" {
   }
 }
 
-resource "aws_launch_template" "valkey-template" {
-  name          = "${local.name}-template"
-  image_id      = data.aws_ami.amazon_linux.id
-  instance_type = var.instance_type
+resource "aws_launch_template" "valkey_template" {
+  name                   = "${local.name}-template"
+  image_id               = data.aws_ami.amazon_linux.id
+  instance_type          = var.instance_type
   update_default_version = true
 
   user_data = base64encode(
@@ -45,7 +45,7 @@ resource "aws_launch_template" "valkey-template" {
   vpc_security_group_ids = [var.sg_cache_id]
 
   iam_instance_profile {
-    arn = var.cache_instance_arn
+    arn = var.cache_iam_instance_arn
   }
 
   credit_specification {
@@ -83,14 +83,17 @@ module "valkey-asg" {
   health_check_grace_period = 150
 
   create_launch_template  = false
-  launch_template_id      = aws_launch_template.valkey-template.id
-  launch_template_version = "$Latest"
+  launch_template_id      = aws_launch_template.valkey_template.id
+  launch_template_version = aws_launch_template.valkey_template.latest_version
 
   instance_refresh = {
     strategy = "Rolling"
     preferences = {
       min_healthy_percentage = 0
+      max_healthy_percentage = 100
+      instance_warmup        = 120
     }
+    skip_matching = false
   }
 
   tags = local.tags

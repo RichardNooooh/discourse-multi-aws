@@ -1,14 +1,16 @@
 
 variable "project" {
-  type = string
+  type     = string
+  nullable = false
 }
 
-variable "region" {
-  type = string
-}
-
-variable "environment" { # dev or prod, or whatever
-  type = string
+variable "environment" {
+  type     = string
+  nullable = false
+  validation {
+    condition     = contains(["dev", "prod"], var.environment)
+    error_message = "environment must be one of: dev, prod."
+  }
 }
 
 variable "extra_tags" {
@@ -25,5 +27,13 @@ variable "cloudflare_prefix_list_id" {
 }
 
 variable "hosted_zone_id" {
+  type = string
+}
+
+variable "s3_uploads_bucket_arn" { # TODO test if we can hide this with the sensitive field
+  type = string
+}
+
+variable "s3_backups_bucket_arn" {
   type = string
 }

@@ -27,8 +27,6 @@ module "postgres_rds" {
   allocated_storage     = 20
   max_allocated_storage = var.max_allocated_storage
 
-  # TODO initialize the database extensions in CI/CD or Packer
-
   db_name  = "discourse"
   username = "postgres"
   password = var.db_password
@@ -39,7 +37,7 @@ module "postgres_rds" {
   # 12:00AM CST - 06:00AM CST
   backup_window           = "05:00-08:00"
   maintenance_window      = "Sun:08:00-Sun:11:00"
-  backup_retention_period = 7
+  backup_retention_period = 3
 
   multi_az = var.multi_az
 }

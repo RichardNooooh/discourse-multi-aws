@@ -13,7 +13,7 @@ locals {
   )
 }
 
-module "fck-nat" {
+module "fck_nat" {
   for_each = local.pub_by_az
 
   source = "git::https://github.com/RaJiska/terraform-aws-fck-nat.git?ref=v1.3.0"
