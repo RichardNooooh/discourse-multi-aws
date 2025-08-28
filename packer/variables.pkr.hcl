@@ -14,9 +14,9 @@ variable "aws_region" {
   type = string
 }
 
-variable "environment" {
-  type = string
-}
+# variable "environment" {
+#   type = string
+# }
 
 # Terraform Variables
 variable "vpc_id" {

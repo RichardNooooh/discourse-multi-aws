@@ -11,8 +11,8 @@ locals {
   timestamp = regex_replace(timestamp(), "[- TZ:]", "")
 }
 
-source "amazon-ebs" "ubuntu" {
-  ami_name      = "${var.ami_prefix}-${var.environment}-${local.timestamp}"
+source "amazon-ebs" "ubuntu" { # TODO deal with excess AMIs...
+  ami_name      = "${var.ami_prefix}-${local.timestamp}"
   instance_type = "${var.build_instance}"
   region        = "${var.aws_region}"
 
@@ -87,7 +87,6 @@ build {
   provisioner "file" {
     source       = "discourse_setup/web_only.yml"
     destination  = "/tmp/web_only.yml"
-    pause_before = "30s"
   }
 
   provisioner "shell" {
