@@ -12,19 +12,19 @@ locals {
 }
 
 source "amazon-ebs" "ubuntu" {
-  ami_name      = "${var.ami_prefix}-${local.timestamp}"
+  ami_name      = "${var.ami_prefix}-${var.environment}-${local.timestamp}"
   instance_type = "${var.build_instance}"
   region        = "${var.aws_region}"
 
-  vpc_id    = "vpc-0ce40a1e28601caf9" # TODO
-  subnet_id = "subnet-0f9f33e2345b857b3"
-  security_group_id = "sg-05ac785247d30a962"
-  ssh_interface = "session_manager"
-  iam_instance_profile = "discourse-dev-packer-iam-instance"
+  vpc_id               = "${var.vpc_id}"
+  subnet_id            = "${var.subnet_id}"
+  security_group_id    = "${var.security_group_id}"
+  iam_instance_profile = "${var.iam_instance_profile_name}"
+  ssh_interface        = "session_manager"
 
   source_ami_filter {
     filters = {
-      name                = "ubuntu/images/*ubuntu-noble-24.04-amd64-server-*"
+      name                = "ubuntu-minimal/images/*/ubuntu-noble-24.04-arm64-minimal-*"
       root-device-type    = "ebs"
       virtualization-type = "hvm"
     }
@@ -46,7 +46,6 @@ source "amazon-ebs" "ubuntu" {
     volume_type = "gp3"
   }
 }
-
 
 build {
   name = "discourse_web"
@@ -78,9 +77,6 @@ build {
 
   provisioner "shell" {
     script = "bootstraper.sh"
-    # env = {
-    #   environment="${var.environment}"
-    # }
   }
 }
 

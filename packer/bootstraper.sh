@@ -18,7 +18,11 @@ sudo mv /tmp/env.yml /var/discourse
 
 cd /var/discourse
 sudo chmod 700 containers
+sudo chmod 700 containers/web_only.yml
+sudo chmod 700 env.yml
 sudo ./launcher bootstrap web_only
+
+# TODO check time synching
 
 echo "Creating systemd file..."
 # 1. removes first two lines (arch and warning) if they are there

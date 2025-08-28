@@ -8,7 +8,7 @@ sudo systemctl status snap.amazon-ssm-agent.amazon-ssm-agent.service
 echo "Starting package update..."
 sudo apt-get update
 sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
-sudo DEBIAN_FRONTEND=noninteractive apt-get -y install ca-certificates curl htop
+sudo DEBIAN_FRONTEND=noninteractive apt-get -y install ca-certificates curl htop vim
 
 # official Docker installation instructions
 sudo install -m 0755 -d /etc/apt/keyrings
