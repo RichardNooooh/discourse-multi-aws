@@ -54,7 +54,7 @@ build {
   ]
 
   provisioner "file" {
-    source      = "discourse_setup/db_init.sql"
+    source      = "container_setup/db_init.sql"
     destination = "/tmp/db_init.sql"
   }
 
@@ -62,6 +62,7 @@ build {
     script = "scripts/update.sh"
     env = {
       DB_PASSWORD = "${var.DB_PASSWORD}"
+      NODE_EXPORTER_VERSION = "${var.node_exporter_version}"
     }
 
     expect_disconnect = true
@@ -70,7 +71,7 @@ build {
   provisioner "shell" {
     script = "scripts/create_secrets.sh"
     env = {
-      HOSTNAME            = "${var.HOSTNAME}"
+      HOSTNAME            = "${var.HOSTNAME}" # TODO need to configure this to work with dev environment as well
       DEVELOPER_EMAILS    = "${var.DEVELOPER_EMAILS}"
       SMTP_ADDRESS        = "${var.SMTP_ADDRESS}"
       SMTP_PORT           = "${var.SMTP_PORT}"
@@ -85,7 +86,7 @@ build {
   }
 
   provisioner "file" {
-    source       = "discourse_setup/web_only.yml"
+    source       = "container_setup/web_only.yml"
     destination  = "/tmp/web_only.yml"
   }
 

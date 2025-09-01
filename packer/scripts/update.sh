@@ -8,7 +8,7 @@ sudo systemctl status snap.amazon-ssm-agent.amazon-ssm-agent.service
 echo "Starting package update..."
 sudo apt-get update
 sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
-sudo DEBIAN_FRONTEND=noninteractive apt-get -y install ca-certificates curl htop vim
+sudo DEBIAN_FRONTEND=noninteractive apt-get -y install ca-certificates curl htop vim tar
 
 # official Docker installation instructions
 sudo install -m 0755 -d /etc/apt/keyrings
@@ -22,6 +22,11 @@ echo \
 
 sudo apt-get update
 sudo DEBIAN_FRONTEND=noninteractive apt-get -y install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# official node_exporter installation
+(cd /tmp && wget https://github.com/prometheus/node_exporter/releases/download/v${NODE_EXPORTER_VERSION}/node_exporter-${NODE_EXPORTER_VERSION}.linux-arm64.tar.gz)
+(cd /tmp && tar xvfz node_exporter-*.*-arm64.tar.gz)
+sudo mv /tmp/node_exporter-*.*-arm64/node_exporter /usr/local/bin/node_exporter
 
 # official postgresql installation
 echo "Adding database extensions to db.discourse.internal if needed"

@@ -14,6 +14,11 @@ variable "aws_region" {
   type = string
 }
 
+variable "node_exporter_version" {
+  type = string
+}
+
+
 # variable "environment" {
 #   type = string
 # }
