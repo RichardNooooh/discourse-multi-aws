@@ -8,9 +8,9 @@ output "sg_web_id" {
   value       = aws_security_group.web.id
 }
 
-output "sg_telemetry_id" {
-  description = "Security Group ID of Telemetry"
-  value       = aws_security_group.telemetry.id
+output "sg_monitor_id" {
+  description = "Security Group ID of monitor"
+  value       = aws_security_group.monitor.id
 }
 
 output "sg_cache_id" {
@@ -30,5 +30,5 @@ output "cache_iam_instance_arn" {
 
 output "webonly_iam_instance_arn" {
   description = "Name of web-only IAM instance profile"
-  value = aws_iam_instance_profile.webonly_iam_instance_profile.arn
+  value       = aws_iam_instance_profile.webonly_iam_instance_profile.arn
 }

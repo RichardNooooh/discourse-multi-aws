@@ -24,7 +24,7 @@ data "aws_iam_policy_document" "ec2_assume_role" {
   }
 }
 
-# S3 IAM access
+# Discourse S3 IAM access
 # https://meta.discourse.org/t/set-up-file-and-image-uploads-to-s3/7229/270
 data "aws_iam_policy_document" "discourse_s3" {
   statement {
@@ -172,6 +172,23 @@ resource "aws_iam_instance_profile" "cache_iam_instance_profile" {
 #! Turns out the packer-specific policy is only needed by the box running Packer itself, i.e. GitHub Actions, not the temporary instance itself
 # TODO
 
+# # ########################## #
+# # IAM for `monitor` instance #
+# # ########################## #
+# resource "aws_iam_role" "monitor_iam" {
+#   name               = "${local.name}-monitor-iam-role"
+#   assume_role_policy = data.aws_iam_policy_document.ec2_assume_role.json
+#   tags               = local.tags
+# }
+
+
+
+# resource "aws_iam_role_policy_attachment" "monitor_iam_ssm_core" {
+#   role       = aws_iam_role.monitor_iam.name
+#   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+# }
+
+
 # ############### #
 # Security Groups #
 # ############### #
@@ -189,8 +206,8 @@ resource "aws_security_group" "web" {
   tags        = local.tags
 }
 
-resource "aws_security_group" "telemetry" { # TODO
-  name        = "${local.name}-telemetry-sg"
+resource "aws_security_group" "monitor" { # TODO
+  name        = "${local.name}-monitor-sg"
   description = "Monitoring stack"
   vpc_id      = var.vpc_id
   tags        = local.tags

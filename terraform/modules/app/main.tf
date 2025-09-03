@@ -4,6 +4,7 @@ locals {
     {
       Project     = var.project,
       Environment = var.environment
+      Role        = "web"
     },
     var.extra_tags
   )
@@ -18,20 +19,20 @@ module "alb" {
   name    = "${local.name}-alb"
   vpc_id  = var.vpc_id
   subnets = var.public_subnets
-  
+
   enable_deletion_protection = false # TODO temporary
   create_security_group      = false
   security_groups            = [var.sg_alb_id]
   idle_timeout               = 90
 
   access_logs = { # TODO lifecycle rules on alb logs
-    bucket  = var.s3_telemetry_bucket_id
+    bucket  = var.s3_monitor_bucket_id
     enabled = true
     prefix  = "alb/access-logs"
   }
 
   connection_logs = {
-    bucket  = var.s3_telemetry_bucket_id
+    bucket  = var.s3_monitor_bucket_id
     enabled = true
     prefix  = "alb/connection-logs"
   }

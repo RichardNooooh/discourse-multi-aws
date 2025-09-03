@@ -8,6 +8,7 @@ locals {
     {
       Project     = var.project,
       Environment = var.environment
+      Role        = "nat"
     },
     var.extra_tags
   )

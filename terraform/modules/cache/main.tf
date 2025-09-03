@@ -4,6 +4,7 @@ locals {
     {
       Project     = var.project,
       Environment = var.environment
+      Role        = "cache"
     },
     var.extra_tags
   )
@@ -69,7 +70,7 @@ resource "aws_launch_template" "valkey_template" {
   tags = local.tags
 }
 
-module "valkey-asg" {
+module "valkey_asg" {
   source              = "git::https://github.com/terraform-aws-modules/terraform-aws-autoscaling?ref=v9.0.1"
   name                = local.name
   vpc_zone_identifier = [var.private_subnet_id]

@@ -27,7 +27,7 @@ resource "random_string" "s3_backups_suffix" {
   upper   = false
 }
 
-resource "random_string" "s3_telemetry_suffix" {
+resource "random_string" "s3_monitor_suffix" {
   length  = 16
   special = false
   upper   = false
@@ -42,7 +42,7 @@ resource "random_string" "s3_retention_suffix" {
 locals {
   uploads_name   = "${local.name}-uploads-${random_string.s3_uploads_suffix.result}"
   backups_name   = "${local.name}-backups-${random_string.s3_backups_suffix.result}"
-  telemetry_name = "${local.name}-telemetry-${random_string.s3_telemetry_suffix.result}"
+  monitor_name   = "${local.name}-monitor-${random_string.s3_monitor_suffix.result}"
   retention_name = "${local.name}-retention-${random_string.s3_retention_suffix.result}"
 }
 
@@ -76,7 +76,8 @@ module "s3_uploads" {
 # ############## #
 module "s3_backups" {
   source = "git::https://github.com/terraform-aws-modules/terraform-aws-s3-bucket.git?ref=v5.4.0"
-  # TODO setup telemetry configuration to monitor s3 sizes
+  # TODO setup monitor configuration to monitor s3 sizes
+  # TODO let Discourse delete old stuff and use versioning for glacier
   bucket        = local.backups_name
   force_destroy = var.force_destroy
 
@@ -101,13 +102,13 @@ module "s3_backups" {
   ]
 }
 
-# ################ #
-# Telemetry Bucket #
-# ################ #
-module "s3_telemetry" {
+# ############## #
+# Monitor Bucket #
+# ############## #
+module "s3_monitor" {
   source = "git::https://github.com/terraform-aws-modules/terraform-aws-s3-bucket.git?ref=v5.4.0"
 
-  bucket        = local.telemetry_name
+  bucket        = local.monitor_name
   force_destroy = var.force_destroy
 
   attach_elb_log_delivery_policy            = true
@@ -155,7 +156,7 @@ module "s3_retention" {
   }
   # TODO configure logging when ready for observability stack
   # logging = {
-  #   target_bucket = module.s3_telemetry.s3_bucket_id
+  #   target_bucket = module.s3_monitor.s3_bucket_id
   #   target_prefix = local.s3_access_log_location
   #   target_object_key_format = {
   #     partitioned_prefix = {

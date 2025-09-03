@@ -36,7 +36,7 @@ variable "private_subnets" {
 # ######### #
 # S3 Module #
 # ######### #
-variable "s3_telemetry_bucket_id" { # TODO test sensitive
+variable "s3_monitor_bucket_id" { # TODO test sensitive
   type = string
 }
 
