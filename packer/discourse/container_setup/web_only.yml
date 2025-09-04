@@ -4,6 +4,7 @@ templates:
   # "templates/web.ssl.template.yml" is not needed/desired b/c we are terminating TLS on ALB
 
   - "templates/cloudflare.template.yml"
+  - "alb_nginx_ip.yml"
   # should be written at runtime in Github Actions
   # ensures environmental variables are set correctly at bootstrap w/o showing them here
   - "secrets.yml"

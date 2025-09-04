@@ -69,6 +69,13 @@ build {
   }
 
   provisioner "shell" {
+    script = "scripts/create_alb_ip_trust.sh"
+    env = {
+      ALB_SUBNETS_LIST = join(",", var.alb_subnet_ips)
+    }
+  }
+
+  provisioner "shell" {
     script = "scripts/create_secrets.sh"
     env = {
       HOSTNAME            = "${var.HOSTNAME}" # TODO need to configure this to work with dev environment as well

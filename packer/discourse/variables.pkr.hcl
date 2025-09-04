@@ -40,6 +40,11 @@ variable iam_instance_profile_name {
   type = string
 }
 
+# ALB IP Trust
+variable "alb_subnet_ips" {
+  type = list(string)
+}
+
 # Secrets
 variable "HOSTNAME" {
   type      = string
