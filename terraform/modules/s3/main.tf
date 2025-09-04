@@ -5,6 +5,7 @@ locals {
     {
       Project     = var.project,
       Environment = var.environment
+      Managed     = "true"
     },
     var.extra_tags
   )
@@ -81,20 +82,24 @@ module "s3_backups" {
   bucket        = local.backups_name
   force_destroy = var.force_destroy
 
+  versioning = {
+    enabled = true
+  }
+
   lifecycle_rule = [
     {
       id      = "long-storage"
       enabled = true
 
-      transition = [
+      noncurrent_version_transition = [
         {
-          days          = 7
-          storage_class = "GLACIER"
+          noncurrent_days = 1
+          storage_class   = "GLACIER"
         }
       ]
 
-      expiration = {
-        days = 100 # minimum: 7 days normal storage + 90 day minimum in Flexible Glacier
+      noncurrent_version_expiration = {
+        noncurrent_days = 91
       }
 
       abort_incomplete_multipart_upload_days = 7

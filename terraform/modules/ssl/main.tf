@@ -5,6 +5,7 @@ locals {
     {
       Project     = var.project,
       Environment = var.environment
+      Managed     = "true"
     },
     var.extra_tags
   )

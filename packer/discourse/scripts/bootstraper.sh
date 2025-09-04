@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -euo pipefail
 # https://meta.discourse.org/t/create-a-swapfile-for-your-linux-server/13880

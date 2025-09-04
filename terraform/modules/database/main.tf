@@ -4,6 +4,7 @@ locals {
     {
       Project     = var.project,
       Environment = var.environment
+      Managed     = "true"
     },
     var.extra_tags
   )
@@ -41,7 +42,7 @@ module "postgres_rds" {
   maintenance_window      = "Sun:08:00-Sun:11:00"
   backup_retention_period = 3
 
-  multi_az = var.multi_az
+  multi_az = var.multi_az # TODO tags
 }
 
 resource "aws_route53_record" "db_cname" {

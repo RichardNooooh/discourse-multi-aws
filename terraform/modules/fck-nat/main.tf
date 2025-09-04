@@ -9,6 +9,7 @@ locals {
       Project     = var.project,
       Environment = var.environment
       Role        = "nat"
+      Managed     = "true"
     },
     var.extra_tags
   )

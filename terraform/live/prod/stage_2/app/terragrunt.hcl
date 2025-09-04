@@ -54,7 +54,7 @@ inputs = {
 
   vpc_id          = dependency.network.outputs.vpc_id
   public_subnets  = dependency.network.outputs.public_subnets
-  private_subnets = dependency.network.outputs.private_subnets
+  private_subnets = [dependency.network.outputs.private_subnets[0]]
 
   s3_monitor_bucket_id = dependency.s3.outputs.s3_monitor_bucket_id
 
@@ -67,6 +67,6 @@ inputs = {
 
   webonly_instance_type = "t4g.small"
   min_size              = 1
-  desired_capacity      = 2
+  desired_capacity      = 1
   max_size              = 4
 }

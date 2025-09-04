@@ -5,6 +5,7 @@ locals {
     {
       Project     = var.project,
       Environment = var.environment
+      Managed     = "true"
     },
     var.extra_tags
   )
@@ -311,6 +312,33 @@ resource "aws_vpc_security_group_egress_rule" "web_tcp_to_cache" {
   from_port                    = 6379
   to_port                      = 6379
   ip_protocol                  = "tcp"
+}
+
+resource "aws_vpc_security_group_egress_rule" "web_smtp_to_internet" {
+  security_group_id = aws_security_group.web.id
+  cidr_ipv4         = "0.0.0.0/0"
+  from_port         = 587
+  to_port           = 587
+  ip_protocol       = "tcp"
+}
+
+# DNS to the VPC resolver (UDP + TCP)
+resource "aws_vpc_security_group_egress_rule" "web_dns_udp" {
+  security_group_id = aws_security_group.web.id
+  cidr_ipv4         = "169.254.169.253/32"
+  from_port         = 53
+  to_port           = 53
+  ip_protocol       = "udp"
+  description       = "DNS to AmazonProvidedDNS"
+}
+
+resource "aws_vpc_security_group_egress_rule" "web_dns_tcp" {
+  security_group_id = aws_security_group.web.id
+  cidr_ipv4         = "169.254.169.253/32"
+  from_port         = 53
+  to_port           = 53
+  ip_protocol       = "tcp"
+  description       = "DNS (TCP fallback) to AmazonProvidedDNS"
 }
 
 resource "aws_vpc_security_group_egress_rule" "web_ntp_to_aws" {

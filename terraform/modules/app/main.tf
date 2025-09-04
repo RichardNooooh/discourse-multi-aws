@@ -5,6 +5,7 @@ locals {
       Project     = var.project,
       Environment = var.environment
       Role        = "web"
+      Managed     = "true"
     },
     var.extra_tags
   )
@@ -133,7 +134,7 @@ resource "aws_launch_template" "webonly_template" {
 
 module "asg" {
   source              = "git::https://github.com/terraform-aws-modules/terraform-aws-autoscaling?ref=v9.0.1"
-  name                = "${local.name}-asg"
+  name                = "${local.name}"
   vpc_zone_identifier = var.private_subnets
 
   min_size         = var.min_size

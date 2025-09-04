@@ -1,0 +1,52 @@
+
+include "root" {
+  path   = find_in_parent_folders("root.hcl")
+  expose = true
+}
+
+locals {
+  project     = include.root.locals.project
+  environment = include.root.locals.environment
+}
+
+dependency "network" {
+  config_path = "../network"
+  mock_outputs = {
+    vpc_id                 = "vpc-00000000"
+    private_hosted_zone_id = "zone-asdfasdfasdf"
+  }
+  mock_outputs_allowed_terraform_commands = ["init", "validate", "fmt"]
+}
+
+dependency "ssl" {
+  config_path = "../ssl"
+  mock_outputs = {
+    cloudflare_prefix_list_id = ["69.210.0.0/20"]
+  }
+  mock_outputs_allowed_terraform_commands = ["init", "validate", "fmt"]
+}
+
+dependency "s3" {
+  config_path = "../s3"
+  mock_outputs = {
+    s3_uploads_bucket_arn = "arn:::asdfasdfasdf"
+    s3_backups_bucket_arn = "arn:::asdfasdfasdf"
+  }
+  mock_outputs_allowed_terraform_commands = ["init", "validate", "fmt"]
+}
+
+terraform {
+  source = "../../../../modules/security"
+}
+
+inputs = {
+  project     = local.project
+  environment = local.environment
+
+  vpc_id                    = dependency.network.outputs.vpc_id
+  cloudflare_prefix_list_id = dependency.ssl.outputs.cloudflare_prefix_list_id
+  hosted_zone_id            = dependency.network.outputs.private_hosted_zone_id
+
+  s3_uploads_bucket_arn = dependency.s3.outputs.s3_uploads_bucket_arn
+  s3_backups_bucket_arn = dependency.s3.outputs.s3_backups_bucket_arn
+}

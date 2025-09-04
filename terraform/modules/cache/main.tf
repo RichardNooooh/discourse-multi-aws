@@ -5,6 +5,7 @@ locals {
       Project     = var.project,
       Environment = var.environment
       Role        = "cache"
+      Managed     = "true"
     },
     var.extra_tags
   )
