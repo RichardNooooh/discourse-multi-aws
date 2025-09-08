@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -euxo pipefail
 
 # register private IP in Route 53
 TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
@@ -10,15 +10,61 @@ echo "Token obtained: $${TOKEN}"
 echo "IPv4 obtained: $${LOCAL_IPV4}"
 
 # basics
-sudo yum update -y
-sudo yum install -y docker htop
-sudo service docker start
-sudo systemctl enable docker
+apt-get update
+DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
+DEBIAN_FRONTEND=noninteractive apt-get -y install ca-certificates curl htop vim tar unzip
+
+# aws cli
+curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+rm -r ./aws
+rm awscliv2.zip
+
+# official Docker installation instructions
+install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+chmod a+r /etc/apt/keyrings/docker.asc
+
+source /etc/os-release
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $${UBUNTU_CODENAME} stable" | \
+  tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+apt-get update
+DEBIAN_FRONTEND=noninteractive apt-get -y install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# official node_exporter installation
+(cd /tmp && wget https://github.com/prometheus/node_exporter/releases/download/v${NODE_EXPORTER_VERSION}/node_exporter-${NODE_EXPORTER_VERSION}.linux-arm64.tar.gz)
+(cd /tmp && tar xvfz node_exporter-*.*-arm64.tar.gz)
+mv /tmp/node_exporter-*.*-arm64/node_exporter /usr/local/bin/node_exporter
+
+echo "Creating systemd file for node_exporter..."
+NODE_EXPORTER_SERVICE_FILE=node_exporter.service
+tee "/etc/systemd/system/$${NODE_EXPORTER_SERVICE_FILE}" > /dev/null <<EOF
+[Unit]
+Description=Prometheus Node Exporter
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/node_exporter
+Restart=always
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target
+EOF
+chmod 600 "/etc/systemd/system/$${NODE_EXPORTER_SERVICE_FILE}"
+
+systemctl daemon-reload
+systemctl enable --now $${NODE_EXPORTER_SERVICE_FILE}
 
 # TODO configure some docker logging management solution so instance doesn't die after a few weeks
 
 # run Valkey in a container
-sudo docker run --restart always -d --name valkey -p 6379:6379 valkey/valkey:latest
+docker run --restart always -d --name valkey -p 6379:6379 valkey/valkey:latest
 
 # https://docs.aws.amazon.com/cli/latest/reference/route53/change-resource-record-sets.html
 cat >/tmp/rrset.json <<JSON

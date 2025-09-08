@@ -41,6 +41,11 @@ variable "record_name" {
   type = string
 }
 
+variable "node_exporter_version" {
+  type    = string
+  default = "1.9.1"
+}
+
 variable "extra_tags" {
   type    = map(string)
   default = {}

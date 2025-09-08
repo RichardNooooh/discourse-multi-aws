@@ -12,30 +12,31 @@ locals {
 }
 
 # provides the `aws` cli by default, just need to install Valkey and/or docker(?)
-data "aws_ami" "amazon_linux" {
-  owners      = ["amazon"]
+data "aws_ami" "ubuntu_minimal" {
+  owners      = ["099720109477"]
   most_recent = true
   filter {
     name   = "name"
-    values = ["al2023-ami-ecs-hvm-*-arm64"]
+    values = ["ubuntu-minimal/images/*/ubuntu-noble-24.04-arm64-minimal-*"]
   }
 }
 
 resource "aws_launch_template" "valkey_template" {
   name                   = "${local.name}-template"
-  image_id               = data.aws_ami.amazon_linux.id
+  image_id               = data.aws_ami.ubuntu_minimal.id
   instance_type          = var.instance_type
   update_default_version = true
 
   user_data = base64encode(
     templatefile("${path.module}/scripts/user_data.tftpl", {
-      RECORD_NAME    = var.record_name
-      HOSTED_ZONE_ID = var.hosted_zone_id
+      RECORD_NAME           = var.record_name
+      HOSTED_ZONE_ID        = var.hosted_zone_id
+      NODE_EXPORTER_VERSION = var.node_exporter_version
     })
   )
 
   block_device_mappings {
-    device_name = "/dev/sdf"
+    device_name = "/dev/sda1"
 
     ebs {
       delete_on_termination = true
