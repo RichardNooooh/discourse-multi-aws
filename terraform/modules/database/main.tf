@@ -29,6 +29,7 @@ module "postgres_rds" {
   apply_immediately     = true
   allocated_storage     = 20
   max_allocated_storage = var.max_allocated_storage
+  storage_type          = "gp3"
 
   db_name  = "discourse"
   username = "postgres"
