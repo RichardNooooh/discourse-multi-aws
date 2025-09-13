@@ -41,9 +41,10 @@ source "amazon-ebs" "ubuntu" { # TODO deal with excess AMIs...
   }
 
   ami_block_device_mappings {
-    device_name = "/dev/sda1"
-    volume_size = var.build_volume
-    volume_type = "gp3"
+    device_name           = "/dev/sda1"
+    volume_size           = var.build_volume
+    volume_type           = "gp3"
+    delete_on_termination = true
   }
 }
 
