@@ -68,8 +68,6 @@ Type=simple
 ExecStart=/usr/local/bin/node_exporter
 Restart=always
 RestartSec=10s
-StartLimitIntervalSec=60
-StartLimitBurst=5
 
 [Install]
 WantedBy=multi-user.target
@@ -78,4 +76,4 @@ sudo chmod 600 "/etc/systemd/system/$NODE_EXPORTER_SERVICE_FILE"
 
 sudo systemctl daemon-reload
 sudo systemctl enable discourse-web_only.service
-sudo systemctl enable node_exporter.service
+sudo systemctl enable $NODE_EXPORTER_SERVICE_FILE
