@@ -43,6 +43,10 @@ env:
   DISCOURSE_BACKUP_LOCATION: s3
   DISCOURSE_INCLUDE_S3_UPLOADS_IN_BACKUPS: true
 
+  # reference for last octet: https://www.regular-expressions.info/ip.html
+  # allows any instance in the private subnets (10.0.16.0/24, 10.0.17.0/24, etc) to connect
+  DISCOURSE_PROMETHEUS_TRUSTED_IP_ALLOWLIST_REGEX: '^10\.0\.(?:1[6-9])\.(?:25[0-5]|2[0-4]\d|[01]?\d\d?)$'
+
 params:
   version: tests-passed
 
