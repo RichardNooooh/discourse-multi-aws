@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+set -euxo pipefail
+
+# Initialize or mount hard drive
+VOL=$(echo ${DATA_VOLUME_ID} | sed 's/-//g')
+DEV_LINK="/dev/disk/by-id/nvme-Amazon_Elastic_Block_Store_$VOL" # 300s shouldn't be too bad... right?
+
+if udevadm wait --timeout=300 "$DEV_LINK"; then
+    DEVICE=$(readlink -f $DEV_LINK)
+    mkdir -p /mnt/data
+    echo "Current device: $DEVICE"
+
+    FS_TYPE="$(blkid -o value -s TYPE "$DEVICE" || true)"
+    if [ -z "$FS_TYPE" ]; then
+        echo "No file system detected on $DEVICE. Creating ext4 filesystem..."
+
+        # https://docs.victoriametrics.com/bestpractices
+        mkfs.ext4 -F -L monitordata -O 64bit,huge_file,extent -T huge "$DEVICE"
+    elif [ "$FS_TYPE" != "ext4" ]; then
+        echo "Refusing to touch $DEVICE of ID $VOL with existing $FS_TYPE filesystem" >&2
+        exit 1
+    else
+        echo "Device already has ext4 filesystem."
+    fi
+
+    UUID="$(blkid -o value -s UUID "$DEVICE")"
+    echo "Creating fstab entry with device UUID $UUID"
+    if ! grep -q "$UUID" /etc/fstab; then
+        echo "UUID=$UUID  /mnt/data  ext4  defaults,nofail,x-systemd.growfs,x-systemd.device-timeout=60s  0  2" >> /etc/fstab
+    fi
+
+    systemctl daemon-reload
+    mount --all --verbose
+    mkdir -p /mnt/data/metrics/
+    mkdir -p /mnt/data/vmagent/
+else
+    echo "WARNING: $DEV_LINK not present after 300s; skipping format and mounting checks" >&2
+    exit 1
+fi
