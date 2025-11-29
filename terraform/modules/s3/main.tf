@@ -10,7 +10,7 @@ locals {
     var.extra_tags
   )
 
-  s3_access_log_location = "s3-access-logs/"
+  retention_access_log_location = "retention-access-logs/"
 }
 
 # ################ #
@@ -122,15 +122,27 @@ module "s3_monitor" {
 
   lifecycle_rule = [
     {
-      id      = "rotate-s3-access-logs"
+      id      = "rotate-retention-access-logs"
       enabled = true
 
       filter = {
-        prefix = local.s3_access_log_location
+        prefix = local.retention_access_log_location
       }
 
       expiration = {
         days = 7
+      }
+    },
+    {
+      id      = "rotate-alb-logs"
+      enabled = true
+
+      filter = {
+        prefix = "alb/"
+      }
+
+      expiration = {
+        days = 180
       }
     }
   ]
@@ -162,7 +174,7 @@ module "s3_retention" {
   # TODO configure logging when ready for observability stack
   # logging = {
   #   target_bucket = module.s3_monitor.s3_bucket_id
-  #   target_prefix = local.s3_access_log_location
+  #   target_prefix = local.retention_access_log_location
   #   target_object_key_format = {
   #     partitioned_prefix = {
   #       partition_date_source = "DeliveryTime"
