@@ -96,8 +96,39 @@ resource "cloudflare_dns_record" "alb_record" {
   type    = "CNAME"
   content = module.alb.dns_name
   ttl     = 1 # automatic
-  proxied = var.cloudflare_proxied
+  proxied = each.value == "www" ? true : var.cloudflare_proxied # www needs to be proxied for redirects
   comment = "Discourse Hostname Record - ${var.environment}"
+}
+
+resource "cloudflare_ruleset" "www_to_root" {
+  count       = var.environment == "prod" ? 1 : 0
+  zone_id     = var.cloudflare_zone_id
+  name        = "Redirect WWW to apex"
+  description = "WWW to apex"
+  kind        = "zone"
+  phase       = "http_request_dynamic_redirect"
+
+  rules = [
+    {
+      action      = "redirect"
+      description = "301 Redirect WWW to Root"
+      
+      expression  = "http.request.full_uri wildcard \"https://www.*\""
+
+      action_parameters = {
+        from_value = {
+          status_code           = 301
+          preserve_query_string = false
+
+          target_url = {
+            expression = "wildcard_replace(http.request.full_uri, \"https://www.*/\", \"https://$${1}\")"
+          }
+        }
+      }
+
+      enabled = true
+    }
+  ]
 }
 
 # ################# #
