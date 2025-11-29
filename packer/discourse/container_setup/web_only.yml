@@ -67,7 +67,6 @@ hooks:
           - sudo -E -u discourse git clone https://github.com/discourse/discourse-category-experts.git
           - sudo -E -u discourse git clone https://github.com/discourse/discourse-perspective-api.git
           - sudo -E -u discourse git clone https://github.com/discourse/discourse-yearly-review.git
-          - sudo -E -u discourse git clone https://github.com/discourse/discourse-cakeday.git
           - sudo -E -u discourse git clone https://github.com/discourse/discourse-saved-searches.git
           - sudo -E -u discourse git clone https://github.com/discourse/discourse-surveys.git
           - sudo -E -u discourse git clone https://github.com/discourse/discourse-prometheus.git
