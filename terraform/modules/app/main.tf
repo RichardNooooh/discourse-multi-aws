@@ -46,10 +46,10 @@ module "alb" {
       target_type = "instance"
       health_check = {
         enabled             = true
-        healthy_threshold   = 5 # number of checks
+        healthy_threshold   = 2  # number of checks
         unhealthy_threshold = 5
-        interval            = 15 # seconds
-        timeout             = 5  # seconds
+        interval            = 30 # seconds
+        timeout             = 20 # seconds
         matcher             = "200"
         path                = "/srv/status" # https://meta.discourse.org/t/health-check-api/119458
       }
@@ -173,7 +173,7 @@ module "asg" {
   max_size         = var.max_size
 
   health_check_type         = "ELB"
-  health_check_grace_period = 150
+  health_check_grace_period = 360 # seconds
 
   # connecting to ALB
   traffic_source_attachments = {
