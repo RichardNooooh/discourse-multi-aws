@@ -32,3 +32,7 @@ output "webonly_iam_instance_arn" {
   description = "Name of web-only IAM instance profile"
   value       = aws_iam_instance_profile.webonly_iam_instance_profile.arn
 }
+
+output "monitor_iam_instance_id" {
+  value = aws_iam_instance_profile.monitor_iam_instance_profile.id
+}

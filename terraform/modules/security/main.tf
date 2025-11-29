@@ -167,6 +167,30 @@ resource "aws_iam_instance_profile" "cache_iam_instance_profile" {
   role = aws_iam_role.cache_iam_role.name
 }
 
+# ########################### #
+# IAM for `monitor` instances #
+# ########################### #
+resource "aws_iam_role" "monitor_iam" {
+  name               = "${local.name}-monitor-iam-role"
+  assume_role_policy = data.aws_iam_policy_document.ec2_assume_role.json
+  tags               = local.tags
+}
+
+resource "aws_iam_role_policy_attachment" "monitor_iam_ssm_core" {
+  role       = aws_iam_role.monitor_iam.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_role_policy_attachment" "monitor_iam_ec2_read" {
+  role       = aws_iam_role.monitor_iam.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess"
+}
+
+resource "aws_iam_instance_profile" "monitor_iam_instance_profile" {
+  name = "${local.name}-monitor-iam-instance"
+  role = aws_iam_role.monitor_iam.name
+}
+
 # # ######################## #
 # # IAM for `packer` runner  #
 # # ######################## #
@@ -207,7 +231,7 @@ resource "aws_security_group" "web" {
   tags        = local.tags
 }
 
-resource "aws_security_group" "monitor" { # TODO
+resource "aws_security_group" "monitor" {
   name        = "${local.name}-monitor-sg"
   description = "Monitoring stack"
   vpc_id      = var.vpc_id
@@ -255,6 +279,22 @@ resource "aws_vpc_security_group_ingress_rule" "web_http_from_alb" {
   ip_protocol                  = "tcp"
 }
 
+resource "aws_vpc_security_group_ingress_rule" "web_http_from_monitor" {
+  security_group_id            = aws_security_group.web.id
+  referenced_security_group_id = aws_security_group.monitor.id
+  from_port                    = 80
+  to_port                      = 80
+  ip_protocol                  = "tcp"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "web_node_from_monitor" {
+  security_group_id            = aws_security_group.web.id
+  referenced_security_group_id = aws_security_group.monitor.id
+  from_port                    = 9100
+  to_port                      = 9100
+  ip_protocol                  = "tcp"
+}
+
 resource "aws_vpc_security_group_ingress_rule" "db_from_web" {
   security_group_id            = aws_security_group.db.id
   referenced_security_group_id = aws_security_group.web.id
@@ -268,6 +308,14 @@ resource "aws_vpc_security_group_ingress_rule" "cache_from_web" {
   referenced_security_group_id = aws_security_group.web.id
   from_port                    = 6379
   to_port                      = 6379
+  ip_protocol                  = "tcp"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "cache_node_from_monitor" {
+  security_group_id            = aws_security_group.cache.id
+  referenced_security_group_id = aws_security_group.monitor.id
+  from_port                    = 9100
+  to_port                      = 9100
   ip_protocol                  = "tcp"
 }
 
@@ -371,4 +419,44 @@ resource "aws_vpc_security_group_egress_rule" "cache_ntp_to_aws" {
   from_port         = 123
   to_port           = 123
   ip_protocol       = "udp"
+}
+
+resource "aws_vpc_security_group_egress_rule" "monitor_node_to_cache" {
+  security_group_id            = aws_security_group.monitor.id
+  referenced_security_group_id = aws_security_group.cache.id
+  from_port                    = 9100
+  to_port                      = 9100
+  ip_protocol                  = "tcp"
+}
+
+resource "aws_vpc_security_group_egress_rule" "monitor_http_to_web" {
+  security_group_id            = aws_security_group.monitor.id
+  referenced_security_group_id = aws_security_group.web.id
+  from_port                    = 80
+  to_port                      = 80
+  ip_protocol                  = "tcp"
+}
+
+resource "aws_vpc_security_group_egress_rule" "monitor_node_to_web" {
+  security_group_id            = aws_security_group.monitor.id
+  referenced_security_group_id = aws_security_group.web.id
+  from_port                    = 9100
+  to_port                      = 9100
+  ip_protocol                  = "tcp"
+}
+
+resource "aws_vpc_security_group_egress_rule" "monitor_http_to_internet" {
+  security_group_id = aws_security_group.monitor.id
+  cidr_ipv4         = "0.0.0.0/0"
+  from_port         = 80
+  to_port           = 80
+  ip_protocol       = "tcp"
+}
+
+resource "aws_vpc_security_group_egress_rule" "monitor_https_to_internet" {
+  security_group_id = aws_security_group.monitor.id
+  cidr_ipv4         = "0.0.0.0/0"
+  from_port         = 443
+  to_port           = 443
+  ip_protocol       = "tcp"
 }
