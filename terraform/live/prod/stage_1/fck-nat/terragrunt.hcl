@@ -29,7 +29,7 @@ inputs = {
   environment = local.environment
 
   vpc_id                  = dependency.network.outputs.vpc_id
-  public_subnets          = [dependency.network.outputs.public_subnets[0]] # just have the first AZ have this
+  public_subnets          = [dependency.network.outputs.public_subnets[0]]          # just have the first AZ have this
   private_route_table_ids = [dependency.network.outputs.private_route_table_ids[0]] # TODO check...
   azs                     = [dependency.network.outputs.azs[0]]
 
