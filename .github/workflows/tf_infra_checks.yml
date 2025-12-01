@@ -1,0 +1,21 @@
+name: 'Check All Infrastructure Format'
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v6
+
+      - name: 'Get Terragrunt Action'
+        uses: grunt-io/terragrunt-action@v3
+
+      - name: 'Run Terragrunt and OpenTofu format checks'
+        working-directory: './terraform/'
+        run: |
+          terragrunt hcl fmt --check --diff
+          tofu fmt -check -diff -recursive
