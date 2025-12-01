@@ -33,9 +33,20 @@ module "fck_nat" {
 
   ha_mode            = true
   use_spot_instances = false # too unreliable
+  # credit_specification = "standard"
 
   ssh_key_name = var.ssh_key_name
   use_ssh      = var.ssh_key_name != null
+
+  # cloud_init_parts = [
+  #   {
+  #     content = "text/x-shellscript"
+  #     content_type = templatefile("${path.module}/scripts/install_node_exporter.tftpl", {
+  #       # DATA_VOLUME_ID = aws_ebs_volume.vmdata.id
+  #     })
+  #   }
+  # ]
+
 
   tags = local.tags
 }

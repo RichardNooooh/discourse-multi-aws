@@ -19,7 +19,7 @@ variable "extra_tags" {
 }
 
 variable "skip_final_snapshot" {
-  type = bool
+  type    = bool
   default = false
 }
 

@@ -32,8 +32,6 @@ if udevadm wait --timeout=300 "$DEV_LINK"; then
 
     systemctl daemon-reload
     mount --all --verbose
-    mkdir -p /mnt/data/metrics/
-    mkdir -p /mnt/data/vmagent/
 else
     echo "WARNING: $DEV_LINK not present after 300s; skipping format and mounting checks" >&2
     exit 1

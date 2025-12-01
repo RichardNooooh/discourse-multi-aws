@@ -46,7 +46,7 @@ module "alb" {
       target_type = "instance"
       health_check = {
         enabled             = true
-        healthy_threshold   = 2  # number of checks
+        healthy_threshold   = 2 # number of checks
         unhealthy_threshold = 5
         interval            = 30 # seconds
         timeout             = 20 # seconds
@@ -95,7 +95,7 @@ resource "cloudflare_dns_record" "alb_record" {
   name    = each.value
   type    = "CNAME"
   content = module.alb.dns_name
-  ttl     = 1 # automatic
+  ttl     = 1                                                   # automatic
   proxied = each.value == "www" ? true : var.cloudflare_proxied # www needs to be proxied for redirects
   comment = "Discourse Hostname Record - ${var.environment}"
 }
@@ -112,8 +112,8 @@ resource "cloudflare_ruleset" "www_to_root" {
     {
       action      = "redirect"
       description = "301 Redirect WWW to Root"
-      
-      expression  = "http.request.full_uri wildcard \"https://www.*\""
+
+      expression = "http.request.full_uri wildcard \"https://www.*\""
 
       action_parameters = {
         from_value = {
@@ -165,7 +165,7 @@ resource "aws_launch_template" "webonly_template" {
 
 module "asg" {
   source              = "git::https://github.com/terraform-aws-modules/terraform-aws-autoscaling?ref=v9.0.1"
-  name                = "${local.name}"
+  name                = local.name
   vpc_zone_identifier = var.private_subnets
 
   min_size         = var.min_size
